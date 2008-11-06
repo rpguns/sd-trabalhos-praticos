@@ -1,0 +1,15 @@
+sdm.epidemic.examples.A
+sdm.epidemic.examples.A.msgs
+sdm.epidemic.examples.B
+sdm.epidemic.examples.B.msgs
+sdm.epidemic.examples.C
+sdm.epidemic.examples.C.msgs
+simsim.core
+simsim.ext.charts
+simsim.ext.rmi
+simsim.graphs
+simsim.gui
+simsim.gui.geom
+simsim.net.euclidean
+simsim.net.orbis
+simsim.utils
