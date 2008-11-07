@@ -105,10 +105,10 @@ public class Main extends Simulation implements Displayable {
 					if (n.startedQuery) {
 						for (Pair<Word,Integer> queriedWord:n.queriedWords) {
 							if (queriedWord != null) {
-								if (n.something.get(queriedWord.first) != null) {
+								if (n.myQueryAnswers.get(queriedWord.first) != null) {
 									
 									if (queriedWord.second != null) { 
-										if (n.something.get(queriedWord.first).size() < queriedWord.second)
+										if (n.myQueryAnswers.get(queriedWord.first).size() < queriedWord.second)
 											i++;
 									}
 								}	
