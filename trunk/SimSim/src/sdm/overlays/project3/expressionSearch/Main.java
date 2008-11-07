@@ -94,6 +94,7 @@ public class Main extends Simulation implements Displayable {
 				if (sentQueries < NUM_OF_QUERIES) {
 					String pattern1 = generateRegularExpression(WordsDB.randomWord());
 					String pattern2 = generateRegularExpression(WordsDB.randomWord());
+					System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
 					NodeDB.randomNode().query(pattern1,pattern2);
 					sentQueries++;
 					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
