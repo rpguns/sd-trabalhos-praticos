@@ -18,4 +18,13 @@ public class Pair<K,V> {
 		return this.second;
 	}
 
+	public boolean equals (Object o) {
+		Pair<K,V> other = (Pair<K,V>) o;
+		return this.getFirst().equals(other.getFirst()) && this.getSecond().equals(other.getSecond());
+	}
+	
+	public int hashCode() {
+		return this.getFirst().hashCode() + this.getSecond().hashCode();
+	}
+	
 }
