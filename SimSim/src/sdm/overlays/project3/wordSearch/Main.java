@@ -36,12 +36,18 @@ public class Main extends Simulation implements Displayable {
 	Main init() {
 		WordsDB.init() ;
 
-		final XYLineChart chart1 = new XYLineChart("Unanswered Queries", 125.0, "Unanswered queries", "time(s)") ;
-		chart1.setYRange( false, 0, 50 ) ;
+		final XYLineChart chart1 = new XYLineChart("Query Success", 125.0, "Query Success", "time(s)") ;
+		chart1.setYRange( false, 0, 100 ) ;
+
+		
+		final XYLineChart chart2 = new XYLineChart("Messages Sent", 125.0, "Messages Sent", "time(s)") ;
+		chart2.setYRange( false, 0, 10000 ) ;
+		
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
-		chart1.setSeriesLinesAndShapes("s1", true, true) ;
+		chart2.setSeriesLinesAndShapes("s0", true, true) ;
 		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);
-		Gui.setFrameRectangle("Unanswered Queries", 484, 0, 480, 480);
+		Gui.setFrameRectangle("Messages Sent", 484, 0, 480, 480);
+		Gui.setFrameRectangle("Query Success", 484, 0, 480, 480);
 
 		
 		
@@ -70,14 +76,18 @@ public class Main extends Simulation implements Displayable {
 			}
 		};
 
-		new PeriodicTask(1.0) {
+		new PeriodicTask(10.0) {
 			public void run() {
 				int i = 0;
+				int j = 0;
 				for( Node n : NodeDB.nodes() ) {
 					i += n.answeredQueries;
+					j += n.messagesSent;
 				};
-				System.err.println(sentQueries);
-				chart1.getSeries("s0").add( Simulation.currentTime(),  sentQueries-i) ;
+				System.err.println("Sent "+sentQueries+" received "+i);
+				chart1.getSeries("s0").add( Simulation.currentTime(),  (i*100/sentQueries)) ;
+				chart2.getSeries("s0").add( Simulation.currentTime(),  j) ;
+				
 			}
 		};
 

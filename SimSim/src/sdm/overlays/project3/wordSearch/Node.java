@@ -25,6 +25,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	HashSet<Integer> myQueriesID = new HashSet<Integer>(10);
 	Queue<Pair<EndPoint,Message>> toSendBuffer = new LinkedList<Pair<EndPoint,Message>>(); 
 	int answeredQueries = 0;
+	int messagesSent = 0;
 
 
 	public Node() {
@@ -44,8 +45,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 					queryCache.removeLast();
 				Queue<Pair<EndPoint,Message>> currentBuffer = new LinkedList<Pair<EndPoint,Message>>(toSendBuffer);
 				toSendBuffer = new LinkedList<Pair<EndPoint,Message>>();
-				for (Pair<EndPoint,Message> p : currentBuffer) 
+				for (Pair<EndPoint,Message> p : currentBuffer) {
 					udpSend(p.getFirst(), p.getSecond());
+					messagesSent++;
+				}
 				
 			}
 		};
@@ -55,6 +58,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 				RandomList<EndPoint> listToSend = new RandomList<EndPoint>();
 				listToSend.add(endpoint);
 				udpSend( contacts.randomElement(), new SeedExchange(listToSend));
+				messagesSent++;
 			}
 		};
 		
@@ -72,7 +76,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void query(Word word) {
 //		System.out.println("Querying...waiting for answer");
 		super.setColor( Color.BLACK ) ;
-		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),5);
+		// NOTA: somos capazes de querer mudar o TTL pra 3
+		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),3);
 		myQueriesID.add(thisQuery.getID());
 		for( EndPoint i : contacts )
 			toSendBuffer.add(new Pair<EndPoint,Message>(
