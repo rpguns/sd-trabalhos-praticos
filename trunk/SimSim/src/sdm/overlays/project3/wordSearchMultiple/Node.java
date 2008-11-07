@@ -11,7 +11,7 @@ import simsim.core.*;
 import simsim.utils.*;
 
 import sdm.overlays.words.*;
-import sdm.overlays.project3.wordSearch.msgs.*;
+import sdm.overlays.project3.wordSearchMultiple.msgs.*;
 import simsim.gui.geom.Line;
 
 

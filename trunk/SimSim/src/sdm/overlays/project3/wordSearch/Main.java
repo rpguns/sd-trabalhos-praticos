@@ -36,12 +36,12 @@ public class Main extends Simulation implements Displayable {
 	Main init() {
 		WordsDB.init() ;
 
-		final XYLineChart chart1 = new XYLineChart("", 125.0, "Unanswered queries", "time(s)") ;
+		final XYLineChart chart1 = new XYLineChart("Unanswered Queries", 125.0, "Unanswered queries", "time(s)") ;
 		chart1.setYRange( false, 0, 50 ) ;
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
 		chart1.setSeriesLinesAndShapes("s1", true, true) ;
 		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);
-		Gui.setFrameRectangle("Error/StdDev", 484, 0, 480, 480);
+		Gui.setFrameRectangle("Unanswered Queries", 484, 0, 480, 480);
 
 		
 		
@@ -85,11 +85,11 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	public void display( Graphics2D gu, Graphics2D gs ) {
-		gs.setColor( Color.gray ) ;
+		/*gs.setColor( Color.gray ) ;
 		gs.setStroke( new BasicStroke(0.5f)) ;
-
+		
 		for( Node i : NodeDB.nodes() ) 
-			i.display(gu, gs) ;
+			i.display(gu, gs) ;*/
 	}
 
 	public static void main( String[] args ) throws Exception {
