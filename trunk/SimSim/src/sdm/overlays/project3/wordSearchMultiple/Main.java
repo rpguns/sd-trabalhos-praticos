@@ -39,18 +39,18 @@ public class Main extends Simulation implements Displayable {
 		
 		
 		
-		final XYLineChart chart1 = new XYLineChart("Answered Queries Percentage", 125.0, "Answered Queries (%)", "time(s)") ;
+		final XYLineChart chart1 = new XYLineChart("Query Success", 125.0, "Answered Queries (%)", "time(s)") ;
 		chart1.setYRange( false, 0, 100 ) ;
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
 		
 		
 		final XYLineChart chart2 = new XYLineChart("Messages Sent", 125.0, "Messages Sent", "time(s)") ;
 		chart2.setYRange( false, 0, 10000000 ) ;
-		chart1.setSeriesLinesAndShapes("s0", true, true) ;
+		chart2.setSeriesLinesAndShapes("s0", true, true) ;
 		
-		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);
-		Gui.setFrameRectangle("Answered Queries Percentage", 484, 0, 480, 480);
-		Gui.setFrameRectangle("Messages Sent", 484, 0, 480, 480);
+		Gui.setFrameRectangle("MainFrame", 0, 0, 360, 360);
+		Gui.setFrameRectangle("Messages Sent", 364, 0, 360, 360);
+		Gui.setFrameRectangle("Query Success", 0, 364, 360, 360);
 
 		
 		

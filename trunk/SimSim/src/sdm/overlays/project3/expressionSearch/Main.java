@@ -5,6 +5,7 @@ import java.util.*;
 
 import simsim.core.*;
 import simsim.ext.charts.XYLineChart;
+import sdm.overlays.project3.expressionSearch.msgs.QueryReply;
 import sdm.overlays.words.*;
 /**
  * This example shows how to create a simulation with a dynamic population of nodes.
@@ -28,7 +29,7 @@ public class Main extends Simulation implements Displayable {
 	int sentQueries = 0;
 	public static final int TOTAL_NODES = 2000 ;
 	public static final int NUM_OF_QUERIES = 500 ;
-	public Hashtable<Word,Integer> wordCount = new Hashtable<Word,Integer>(5000);
+	public Hashtable<Pair<String,String>,Integer> wordCount = new Hashtable<Pair<String,String>,Integer>(500);
 	public static Random generator = new Random();
 
 
@@ -54,14 +55,18 @@ public class Main extends Simulation implements Displayable {
 		
 		
 		
-		final XYLineChart chart1 = new XYLineChart("Answered Queries Percentage", 125.0, "Answered Queries (%)", "time(s)") ;
+		final XYLineChart chart1 = new XYLineChart("Query Success", 125.0, "Answered Queries (%)", "time(s)") ;
 		chart1.setYRange( false, 0, 100 ) ;
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
-		chart1.setSeriesLinesAndShapes("s1", true, true) ;
-		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);
-		Gui.setFrameRectangle("Answered Queries Percentage", 484, 0, 480, 480);
-
 		
+		final XYLineChart chart2 = new XYLineChart("Messages Sent", 125.0, "Messages Sent", "time(s)") ;
+		chart2.setYRange( false, 0, 10000000 ) ;
+		chart2.setSeriesLinesAndShapes("s0", true, true) ;
+		
+		
+		Gui.setFrameRectangle("MainFrame", 0, 0, 360, 360);
+		Gui.setFrameRectangle("Messages Sent", 364, 0, 360, 360);
+		Gui.setFrameRectangle("Query Success", 0, 364, 360, 360);
 		
 		//Create the simulation nodes
 		for( int i = 0 ; i < TOTAL_NODES ; i++ ) 
@@ -71,15 +76,7 @@ public class Main extends Simulation implements Displayable {
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
 
-		for( Node i : NodeDB.nodes() ) {
-			for (Word w:i.words) {
-				Integer previous = wordCount.get(w);
-				if (previous == null)
-					wordCount.put(w,1);
-				else
-					wordCount.put(w,previous+1);
-			}
-		}	
+
 			
 //		Word testWord = WordsDB.randomWord();
 //		Node testNode = NodeDB.randomNode();
@@ -96,9 +93,32 @@ public class Main extends Simulation implements Displayable {
 					Node n = NodeDB.randomNode();
 					String pattern1 = generateRegularExpression(n.words.randomElement());
 					String pattern2 = generateRegularExpression(n.words.randomElement());
-					//System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
+					System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
+					
+					for( Node i : NodeDB.nodes() ) {
+						Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
+							i.patternizer(pattern1,pattern2);
+
+						if (matchingResults != null) {
+//							System.out.println("Node: "+i.address.pos);
+//							System.out.println(matchingResults.first.first.value+ " == "+ pattern1);
+//							System.out.println(matchingResults.second.first.value+ " == "+ pattern2);
+//						
+							Integer previous = wordCount.get(new Pair<String,String>(pattern1,pattern2));
+							if (previous == null)
+								wordCount.put(new Pair<String,String>(pattern1,pattern2),1);
+							else
+								wordCount.put(new Pair<String,String>(pattern1,pattern2),previous+1);
+						}
+						//else
+							//System.err.println("WE R GOTS A NULL");
+					}	
+					
 					NodeDB.randomNode().query(pattern1,pattern2);
 					sentQueries++;
+					
+
+					//System.out.println("expected result: "+ wordCount.get(new Pair<String,String>(pattern1,pattern2)));
 					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
 				}
 				
@@ -115,30 +135,32 @@ public class Main extends Simulation implements Displayable {
 //	};
 
 		
-/*		new PeriodicTask(10.0) {
+		new PeriodicTask(10.0) {
 			public void run() {
 				int i = 0;
-				int expected = 0;
+				int j = 0;
 				for( Node n : NodeDB.nodes() ) {
+					j += n.messagesSent;
 					if (n.startedQuery) {
-						for (Pair<Word,Integer> queriedWord:n.queriedWords) {
-							if (queriedWord != null) {
-								if (n.myQueryAnswers.get(queriedWord.first) != null) {
+						for (Pair<String,String> queriedExp:n.myQueryAnswers.keySet()) {
+								if (n.myQueryAnswers.get(queriedExp) != null) {
 									
-									if (queriedWord.second != null) { 
-										if (n.myQueryAnswers.get(queriedWord.first).size() < queriedWord.second)
+									if (n.myQueryAnswers.get(queriedExp) != null) { 
+										//System.out.println(n.myQueryAnswers.get(queriedExp).size() +" < "+wordCount.get(queriedExp));
+										if (n.myQueryAnswers.get(queriedExp).size() < wordCount.get(queriedExp))
 											i++;
 									}
-								}	
-							}
+								}
 						}
 					}
 					};
 				System.err.println(sentQueries);
 				System.out.println(sentQueries-i +" done with "+sentQueries+" sent");
 				chart1.getSeries("s0").add( Simulation.currentTime(),  ((sentQueries-i)*100)/(sentQueries)) ;
+				chart2.getSeries("s0").add( Simulation.currentTime(),  j) ;
+				
 			}
-		};*/
+		};
 
 		return this ;
 	}
