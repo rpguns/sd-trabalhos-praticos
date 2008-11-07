@@ -39,12 +39,12 @@ public class Main extends Simulation implements Displayable {
 		
 		
 		
-		final XYLineChart chart1 = new XYLineChart("", 125.0, "Unanswered queries", "time(s)") ;
+		final XYLineChart chart1 = new XYLineChart("Answered Queries Percentage", 125.0, "Answered Queries (%)", "time(s)") ;
 		chart1.setYRange( false, 0, 100 ) ;
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
 		chart1.setSeriesLinesAndShapes("s1", true, true) ;
 		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);
-		Gui.setFrameRectangle("Error/StdDev", 484, 0, 480, 480);
+		Gui.setFrameRectangle("Answered Queries Percentage", 484, 0, 480, 480);
 
 		
 		
@@ -69,7 +69,7 @@ public class Main extends Simulation implements Displayable {
 //		Word testWord = WordsDB.randomWord();
 //		Node testNode = NodeDB.randomNode();
 		//testNode.query(testWord,wordCount.get(testWord));
-		super.setSimulationMaxTimeWarp(2.0) ;
+		super.setSimulationMaxTimeWarp(5.0) ;
 
 		//System.out.println("Test word exists in "+ wordCount.get(testWord)+" nodes");
 		System.out.println("Init complete...") ;

@@ -50,9 +50,11 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			}
 		};
 		
-		new PeriodicTask(this, rg.nextDouble(), 10.0) {
+		new PeriodicTask(this, rg.nextDouble(), 5.0) {
 			public void run() {
-				udpSend( contacts.randomElement(), new SeedExchange(contacts));
+				RandomList<EndPoint> listToSend = new RandomList<EndPoint>();
+				listToSend.add(endpoint);
+				udpSend( contacts.randomElement(), new SeedExchange(listToSend));
 			}
 		};
 		
