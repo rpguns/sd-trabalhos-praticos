@@ -31,6 +31,7 @@ public class Main extends Simulation implements Displayable {
 	public Hashtable<Word,Integer> wordCount = new Hashtable<Word,Integer>(5000);
 	public static Random generator = new Random();
 
+
 	public static String generateRegularExpression(Word word) {
 		String wordValue = word.value;
 		int breakingPoint = generator.nextInt(wordValue.length()-2)+1;

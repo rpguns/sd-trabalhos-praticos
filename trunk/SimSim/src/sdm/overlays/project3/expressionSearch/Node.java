@@ -26,7 +26,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	Deque<Integer> queryCache = new LinkedList<Integer>();
 	HashSet<Integer> myQueriesID = new HashSet<Integer>(10);
 	Queue<Pair<EndPoint,Message>> toSendBuffer = new LinkedList<Pair<EndPoint,Message>>(); 
-	int answeredQueries = 0;
+	int messagesSent = 0;
 
 
 	public Node() {
@@ -46,8 +46,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 					queryCache.removeLast();
 				Queue<Pair<EndPoint,Message>> currentBuffer = new LinkedList<Pair<EndPoint,Message>>(toSendBuffer);
 				toSendBuffer = new LinkedList<Pair<EndPoint,Message>>();
-				for (Pair<EndPoint,Message> p : currentBuffer) 
+				for (Pair<EndPoint,Message> p : currentBuffer) { 
 					udpSend(p.getFirst(), p.getSecond());
+					messagesSent++;
+				}
 				
 			}
 		};
@@ -57,6 +59,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 				RandomList<EndPoint> listToSend = new RandomList<EndPoint>();
 				listToSend.add(endpoint);
 				udpSend( contacts.randomElement(), new SeedExchange(listToSend));
+				messagesSent++;
 			}
 		};
 		
