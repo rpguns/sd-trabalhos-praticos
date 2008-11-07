@@ -137,14 +137,14 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void onReceive(EndPoint src, QueryReply msg) {
 		//TODO
-		Pair<String,String> receivedPatterns = new Pair<String,String>(msg.getMatchingWord1().getSecond(),msg.getMatchingWord1().getSecond());
-		if (myQueriesID.contains(msg.getID()) && !myQueryAnswers.get(receivedPatterns).contains(src)) {
+		Pair<String,String> receivedPatterns = new Pair<String,String>(msg.getMatchingWord1().getSecond(),msg.getMatchingWord2().getSecond());
+		if (myQueriesID.contains(msg.getID()) /*&& !myQueryAnswers.get(receivedPatterns).contains(src)*/) {
 			System.out.println(this.address.pos + " got an answer to a query from "+src.address.pos);
 			System.out.println("Word: "+msg.getMatchingWord1().getFirst().value+" Pattern: "+msg.getMatchingWord1().getSecond());
 			System.out.println("Word: "+msg.getMatchingWord2().getFirst().value+" Pattern: "+msg.getMatchingWord2().getSecond());
 			System.out.println();
 			
-			myQueryAnswers.get(receivedPatterns).add(src);
+			//myQueryAnswers.get(receivedPatterns).add(src);
 		}
 	}
 	

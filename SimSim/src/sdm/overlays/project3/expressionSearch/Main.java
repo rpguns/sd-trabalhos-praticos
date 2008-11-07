@@ -37,7 +37,7 @@ public class Main extends Simulation implements Displayable {
 		
 		if (generator.nextBoolean()) {
 			String basePattern = wordValue.substring(0,breakingPoint);
-			return basePattern+"*";
+			return basePattern+".*";
 		} else {
 			String basePattern = wordValue.substring(breakingPoint);
 			return ".*"+basePattern;
