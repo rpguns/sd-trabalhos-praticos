@@ -22,7 +22,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	RandomList<EndPoint> contacts ;
 	boolean gotQuery = false;
 	boolean startedQuery = false;
-	Dictionary<Pair<String,String>,Set<EndPoint>> myQueryAnswers = new Hashtable<Pair<String,String>,Set<EndPoint>>();
+	Map<Pair<String,String>,Set<EndPoint>> myQueryAnswers = new HashMap<Pair<String,String>,Set<EndPoint>>();
 	Deque<Integer> queryCache = new LinkedList<Integer>();
 	HashSet<Integer> myQueriesID = new HashSet<Integer>(10);
 	Queue<Pair<EndPoint,Message>> toSendBuffer = new LinkedList<Pair<EndPoint,Message>>(); 
@@ -138,13 +138,13 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, QueryReply msg) {
 		//TODO
 		Pair<String,String> receivedPatterns = new Pair<String,String>(msg.getMatchingWord1().getSecond(),msg.getMatchingWord2().getSecond());
-		if (myQueriesID.contains(msg.getID()) /*&& !myQueryAnswers.get(receivedPatterns).contains(src)*/) {
+		if (myQueriesID.contains(msg.getID()) && !myQueryAnswers.get(receivedPatterns).contains(src)) {
 			System.out.println(this.address.pos + " got an answer to a query from "+src.address.pos);
 			System.out.println("Word: "+msg.getMatchingWord1().getFirst().value+" Pattern: "+msg.getMatchingWord1().getSecond());
 			System.out.println("Word: "+msg.getMatchingWord2().getFirst().value+" Pattern: "+msg.getMatchingWord2().getSecond());
 			System.out.println();
 			
-			//myQueryAnswers.get(receivedPatterns).add(src);
+			myQueryAnswers.get(receivedPatterns).add(src);
 		}
 	}
 	
