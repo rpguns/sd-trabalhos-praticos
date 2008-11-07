@@ -18,7 +18,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	private static final int NUM_CONTACTS = 20 ;
 	private static final int MAX_SAVED_MSG = 100;
 	boolean displayable = false;
-	Set<Word> words ;
+	RandomList<Word> words ;
 	RandomList<EndPoint> contacts ;
 	boolean gotQuery = false;
 	boolean startedQuery = false;
@@ -35,7 +35,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	}
 
 	public void init() {
-		words = WordsDB.randomWords(10);
+		words = new RandomList<Word>(WordsDB.randomWords(10));
 		super.setColor( Color.green ) ;
 		contacts = NodeDB.randomEndPoints(this, NUM_CONTACTS) ; // número de contactos até 50
 		//contacts = NodeDB.closestNodes( this, NUM_CONTACTS) ; // obtém X nós na proximidade, útil para fazer debug visual da progressão das pesquisas...
@@ -139,7 +139,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		//TODO
 		Pair<String,String> receivedPatterns = new Pair<String,String>(msg.getMatchingWord1().getSecond(),msg.getMatchingWord1().getSecond());
 		if (myQueriesID.contains(msg.getID()) && !myQueryAnswers.get(receivedPatterns).contains(src)) {
-			//System.out.println(this.address.pos + " got an answer to a query\nID: "+msg.getID()+" Word: "+msg.getWord().value+" Node: "+src.address.pos+"\n");
+			System.out.println(this.address.pos + " got an answer to a query from "+src.address.pos);
+			System.out.println("Word: "+msg.getMatchingWord1().getFirst().value+" Pattern: "+msg.getMatchingWord1().getSecond());
+			System.out.println("Word: "+msg.getMatchingWord2().getFirst().value+" Pattern: "+msg.getMatchingWord2().getSecond());
+			System.out.println();
 			
 			myQueryAnswers.get(receivedPatterns).add(src);
 		}
