@@ -100,7 +100,6 @@ public class Main extends Simulation implements Displayable {
 		new PeriodicTask(10.0) {
 			public void run() {
 				int i = 0;
-				int expected = 0;
 				for( Node n : NodeDB.nodes() ) {
 					if (n.startedQuery) {
 						for (Pair<Word,Integer> queriedWord:n.queriedWords) {

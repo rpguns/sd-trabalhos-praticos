@@ -5,7 +5,6 @@ import static simsim.core.Simulation.rg;
 import java.awt.* ;
 
 import java.util.* ;
-import java.util.List;
 
 import simsim.core.*;
 import simsim.utils.*;
@@ -20,11 +19,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	private static final int MAX_SAVED_MSG = 100;
 	boolean displayable = false;
 	Set<Word> words ;
-	List<Pair<Word,Integer>> queriedWords = new LinkedList<Pair<Word,Integer>>();
 	RandomList<EndPoint> contacts ;
 	boolean gotQuery = false;
 	boolean startedQuery = false;
-	Dictionary<Word,Set<EndPoint>> myQueryAnswers = new Hashtable<Word,Set<EndPoint>>();
+	Dictionary<Pair<String,String>,Set<EndPoint>> myQueryAnswers = new Hashtable<Pair<String,String>,Set<EndPoint>>();
 	Deque<Integer> queryCache = new LinkedList<Integer>();
 	HashSet<Integer> myQueriesID = new HashSet<Integer>(10);
 	Queue<Pair<EndPoint,Message>> toSendBuffer = new LinkedList<Pair<EndPoint,Message>>(); 
@@ -69,18 +67,22 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	 * MESSAGE HANDLERS
 	 */
 	
-	public int computeID(EndPoint origin, Word word) {
+	public Pair<Pair<Word,String>,Pair<Word,String>> patternizer(String pat1, String pat2) {
+		Pair<Pair<Word,String>,Pair<Word,String>> result = null;
+		return result;
+	}
+	
+	public int computeID(EndPoint origin, String word) {
 		return new Random(origin.hashCode() + word.hashCode()).nextInt(1000000);
 	}
 
-	public void query(Word word, Integer expectedResult) {
+	public void query(String pattern1, String pattern2) {
 //		System.out.println("Querying...waiting for answer");
 		startedQuery = true;
-		queriedWords.add(new Pair<Word,Integer>(word,expectedResult));
 		super.setColor( Color.BLACK ) ;
-		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),5);
+		SearchQuery thisQuery = new SearchQuery(this.endpoint,pattern1,pattern2,computeID(this.endpoint,pattern1+pattern2),5);
 		myQueriesID.add(thisQuery.getID());
-		myQueryAnswers.put(word,new HashSet<EndPoint>());
+		myQueryAnswers.put(new Pair<String,String>(pattern1,pattern2),new HashSet<EndPoint>());
 		for( EndPoint i : contacts )
 			toSendBuffer.add(new Pair<EndPoint,Message>(
 					i,thisQuery));
@@ -98,9 +100,12 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //				queryCache.removeLast();
 			queryCache.addFirst(msg.getID());
 
-			if (words.contains(msg.getWord())) {
+			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
+				patternizer(msg.getExpression1(),msg.getExpression2());
+			
+			if (matchingResults != null) {
 				toSendBuffer.add(new Pair<EndPoint,Message>(
-						msg.getOrigin(),new QueryReply(msg.getWord(),msg.getID()) ));
+						msg.getOrigin(),new QueryReply(matchingResults.getFirst(),matchingResults.getSecond(),msg.getID()) ));
 				super.setColor( Color.BLUE );
 			}
 			//else
@@ -108,18 +113,20 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 				{
 					for (EndPoint x:contacts)
 						if (!x.equals(src))
-							toSendBuffer.add(new Pair<EndPoint,Message>(
-									x,new SearchQuery(msg.getOrigin(),msg.getWord(),msg.getID(),msg.getTTL()-1) ));
+							toSendBuffer.add(new Pair<EndPoint,Message>(x,
+									new SearchQuery(msg.getOrigin(),msg.getExpression1(),msg.getExpression2(),
+											msg.getID(),msg.getTTL()-1) ));
 				}
 		}
 	}
 
 	public void onReceive(EndPoint src, QueryReply msg) {
 		//TODO
-		if (myQueriesID.contains(msg.getID()) && !myQueryAnswers.get(msg.getWord()).contains(src)) {
+		Pair<String,String> receivedPatterns = new Pair<String,String>(msg.getMatchingWord1().getSecond(),msg.getMatchingWord1().getSecond());
+		if (myQueriesID.contains(msg.getID()) && !myQueryAnswers.get(receivedPatterns).contains(src)) {
 			//System.out.println(this.address.pos + " got an answer to a query\nID: "+msg.getID()+" Word: "+msg.getWord().value+" Node: "+src.address.pos+"\n");
 			
-			myQueryAnswers.get(msg.getWord()).add(src);
+			myQueryAnswers.get(receivedPatterns).add(src);
 		}
 	}
 	
