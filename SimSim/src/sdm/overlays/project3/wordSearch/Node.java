@@ -35,7 +35,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void init() {
 		words = WordsDB.randomWords(10);
-		super.setColor( Color.green ) ;
+		super.setColor( Color.WHITE ) ;
 		contacts = NodeDB.randomEndPoints(this, NUM_CONTACTS) ; // número de contactos até 50
 		//contacts = NodeDB.closestNodes( this, NUM_CONTACTS) ; // obtém X nós na proximidade, útil para fazer debug visual da progressão das pesquisas...
 
@@ -75,7 +75,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void query(Word word) {
 //		System.out.println("Querying...waiting for answer");
-		super.setColor( Color.BLACK ) ;
+		super.setColor( Color.RED ) ;
 		// NOTA: somos capazes de querer mudar o TTL pra 3
 		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),3);
 		myQueriesID.add(thisQuery.getID());
@@ -91,7 +91,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 		gotQuery = true;
 		if (!queryCache.contains(msg.getID()) && !myQueriesID.contains(msg.getID())) {
-			super.setColor( Color.WHITE ) ;
+			//super.setColor( Color.WHITE ) ;
 //			if (queryCache.size() == MAX_SAVED_MSG)
 //				queryCache.removeLast();
 			queryCache.addFirst(msg.getID());

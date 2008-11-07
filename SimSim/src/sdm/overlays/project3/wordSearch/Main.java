@@ -41,13 +41,13 @@ public class Main extends Simulation implements Displayable {
 
 		
 		final XYLineChart chart2 = new XYLineChart("Messages Sent", 125.0, "Messages Sent", "time(s)") ;
-		chart2.setYRange( false, 0, 10000 ) ;
+		chart2.setYRange( false, 0, 10000000 ) ;
 		
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
 		chart2.setSeriesLinesAndShapes("s0", true, true) ;
-		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);
-		Gui.setFrameRectangle("Messages Sent", 484, 0, 480, 480);
-		Gui.setFrameRectangle("Query Success", 484, 0, 480, 480);
+		Gui.setFrameRectangle("MainFrame", 0, 0, 360, 360);
+		Gui.setFrameRectangle("Messages Sent", 364, 0, 360, 360);
+		Gui.setFrameRectangle("Query Success", 0, 364, 360, 360);
 
 		
 		
@@ -68,6 +68,8 @@ public class Main extends Simulation implements Displayable {
 		new PeriodicTask(0.5) {
 			public void run() {
 				if (sentQueries < NUM_OF_QUERIES) {
+					for( Node n : NodeDB.nodes() )
+						n.setColor(Color.WHITE);
 					NodeDB.randomNode().query(NodeDB.randomNode().words.iterator().next());
 					sentQueries++;
 					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
@@ -76,14 +78,14 @@ public class Main extends Simulation implements Displayable {
 			}
 		};
 
-		new PeriodicTask(10.0) {
+		new PeriodicTask(5.0) {
 			public void run() {
 				int i = 0;
 				int j = 0;
 				for( Node n : NodeDB.nodes() ) {
 					i += n.answeredQueries;
 					j += n.messagesSent;
-				};
+				}
 				System.err.println("Sent "+sentQueries+" received "+i);
 				chart1.getSeries("s0").add( Simulation.currentTime(),  (i*100/sentQueries)) ;
 				chart2.getSeries("s0").add( Simulation.currentTime(),  j) ;
