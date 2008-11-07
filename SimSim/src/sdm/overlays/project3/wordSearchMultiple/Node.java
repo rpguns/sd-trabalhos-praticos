@@ -24,7 +24,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	RandomList<EndPoint> contacts ;
 	boolean gotQuery = false;
 	boolean startedQuery = false;
-	Dictionary<Word,Set<EndPoint>> something = new Hashtable<Word,Set<EndPoint>>();
+	Dictionary<Word,Set<EndPoint>> myQueryAnswers = new Hashtable<Word,Set<EndPoint>>();
 	Deque<Integer> queryCache = new LinkedList<Integer>();
 	HashSet<Integer> myQueriesID = new HashSet<Integer>(10);
 	Queue<Pair<EndPoint,Message>> toSendBuffer = new LinkedList<Pair<EndPoint,Message>>(); 
@@ -78,7 +78,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		super.setColor( Color.BLACK ) ;
 		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),5);
 		myQueriesID.add(thisQuery.getID());
-		something.put(word,new HashSet<EndPoint>());
+		myQueryAnswers.put(word,new HashSet<EndPoint>());
 		for( EndPoint i : contacts )
 			toSendBuffer.add(new Pair<EndPoint,Message>(
 					i,thisQuery));
@@ -114,10 +114,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void onReceive(EndPoint src, QueryReply msg) {
 		//TODO
-		if (myQueriesID.contains(msg.getID()) && !something.get(msg.getWord()).contains(src)) {
+		if (myQueriesID.contains(msg.getID()) && !myQueryAnswers.get(msg.getWord()).contains(src)) {
 			//System.out.println(this.address.pos + " got an answer to a query\nID: "+msg.getID()+" Word: "+msg.getWord().value+" Node: "+src.address.pos+"\n");
 			
-			something.get(msg.getWord()).add(src);
+			myQueryAnswers.get(msg.getWord()).add(src);
 		}
 	}
 	
