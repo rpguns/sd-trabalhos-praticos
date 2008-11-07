@@ -78,8 +78,11 @@ public class Main extends Simulation implements Displayable {
 			public void run() {
 				
 				if (sentQueries < NUM_OF_QUERIES) {
-					Word query = WordsDB.randomWord();
-					NodeDB.randomNode().query(query,wordCount.get(query));
+					Word word1 = WordsDB.randomWord();
+					Word word2 = WordsDB.randomWord();
+					String pattern1 = word1.value;
+					String pattern2 = word2.value;
+					NodeDB.randomNode().query(pattern1,pattern2);
 					sentQueries++;
 					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
 				}
@@ -97,7 +100,7 @@ public class Main extends Simulation implements Displayable {
 //	};
 
 		
-		new PeriodicTask(10.0) {
+/*		new PeriodicTask(10.0) {
 			public void run() {
 				int i = 0;
 				int expected = 0;
@@ -120,7 +123,7 @@ public class Main extends Simulation implements Displayable {
 				System.out.println(sentQueries-i +" done with "+sentQueries+" sent");
 				chart1.getSeries("s0").add( Simulation.currentTime(),  ((sentQueries-i)*100)/(sentQueries)) ;
 			}
-		};
+		};*/
 
 		return this ;
 	}

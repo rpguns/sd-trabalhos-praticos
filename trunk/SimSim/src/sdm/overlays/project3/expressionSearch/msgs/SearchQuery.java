@@ -2,21 +2,21 @@ package sdm.overlays.project3.expressionSearch.msgs;
 
 import java.awt.* ;
 import simsim.core.*;
-import sdm.overlays.words.*;
 
 public class SearchQuery extends Message {
 	
 	protected EndPoint origin;
-	protected Word word;
+	protected String exp1,exp2;
 	
 	protected int ID;
 	protected int TTL;
 	
-	public SearchQuery( EndPoint origin, Word word, int ID, int TTL ) {
+	public SearchQuery( EndPoint origin, String exp1, String exp2, int ID, int TTL ) {
 		super( false, Color.red ) ;
 		
 		this.origin = origin;
-		this.word = word;
+		this.exp1 = exp1;
+		this.exp2 = exp2;
 		this.ID = ID;
 		this.TTL = TTL;
 	}
@@ -25,8 +25,12 @@ public class SearchQuery extends Message {
 		return origin;
 	}
 	
-	public Word getWord() {
-		return word;
+	public String getExpression1() {
+		return exp1;
+	}
+	
+	public String getExpression2() {
+		return exp2;
 	}
 	
 	public int getID() {
