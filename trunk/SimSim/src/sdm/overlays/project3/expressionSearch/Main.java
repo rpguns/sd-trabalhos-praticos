@@ -29,7 +29,21 @@ public class Main extends Simulation implements Displayable {
 	public static final int TOTAL_NODES = 2000 ;
 	public static final int NUM_OF_QUERIES = 500 ;
 	public Hashtable<Word,Integer> wordCount = new Hashtable<Word,Integer>(5000);
+	public static Random generator = new Random();
 
+	public static String generateRegularExpression(Word word) {
+		String wordValue = word.value;
+		int breakingPoint = generator.nextInt(wordValue.length()-2)+1;
+		
+		if (generator.nextBoolean()) {
+			String basePattern = wordValue.substring(0,breakingPoint);
+			return basePattern+"*";
+		} else {
+			String basePattern = wordValue.substring(breakingPoint);
+			return "*"+basePattern;
+		}
+	}
+	
 	Main() {
 		super( 10, EnumSet.of( DisplayFlags.SIMULATION, DisplayFlags.TIME, DisplayFlags.NETWORK, DisplayFlags.TRAFFIC ) ) ;
 	}
@@ -78,10 +92,8 @@ public class Main extends Simulation implements Displayable {
 			public void run() {
 				
 				if (sentQueries < NUM_OF_QUERIES) {
-					Word word1 = WordsDB.randomWord();
-					Word word2 = WordsDB.randomWord();
-					String pattern1 = word1.value;
-					String pattern2 = word2.value;
+					String pattern1 = generateRegularExpression(WordsDB.randomWord());
+					String pattern2 = generateRegularExpression(WordsDB.randomWord());
 					NodeDB.randomNode().query(pattern1,pattern2);
 					sentQueries++;
 					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
