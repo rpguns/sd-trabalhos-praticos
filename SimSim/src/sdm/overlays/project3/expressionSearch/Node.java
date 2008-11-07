@@ -67,9 +67,24 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	 * MESSAGE HANDLERS
 	 */
 	
+	public Pair<Word,String> matchExpression(String expression) {
+		Word matchedWord = null;
+		for (Word w : words) {
+			if (w.value.matches(expression))
+				matchedWord = w;
+		}
+		if (matchedWord != null)
+			return new Pair<Word,String>(matchedWord,expression);
+		return null;
+	}
+	
 	public Pair<Pair<Word,String>,Pair<Word,String>> patternizer(String pat1, String pat2) {
-		Pair<Pair<Word,String>,Pair<Word,String>> result = null;
-		return result;
+
+		Pair<Word,String> matchingPair1 = matchExpression(pat1);
+		Pair<Word,String> matchingPair2 = matchExpression(pat2);
+		if (matchingPair1 != null && matchingPair2 != null)
+			return new Pair<Pair<Word,String>,Pair<Word,String>>(matchingPair1,matchingPair2);
+		return null;
 	}
 	
 	public int computeID(EndPoint origin, String word) {
