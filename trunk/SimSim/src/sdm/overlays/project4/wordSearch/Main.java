@@ -13,7 +13,7 @@ import sdm.overlays.words.*;
 
 public class Main extends Simulation implements Displayable {
 	
-	public static final int TOTAL_NODES = 1000 ;
+	public static final int TOTAL_NODES = 2000 ;
 
 	Main() {
 		super( 10, EnumSet.of( DisplayFlags.SIMULATION, DisplayFlags.TIME, DisplayFlags.TRAFFIC ) ) ;
