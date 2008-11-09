@@ -5,4 +5,5 @@ import simsim.core.*;
 public interface ExtendedMessageHandler extends MessageHandler {
 	
 	public void onReceive( EndPoint src, ChordMessage m) ;	
+	public void onReceive( EndPoint src, PutMessage m) ;
 }
