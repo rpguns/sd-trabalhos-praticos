@@ -78,7 +78,7 @@ public class Main extends Simulation implements Displayable {
 			}
 		};
 
-		new PeriodicTask(5.0) {
+		new PeriodicTask(10.0) {
 			public void run() {
 				int i = 0;
 				int j = 0;

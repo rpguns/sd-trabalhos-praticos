@@ -45,7 +45,7 @@ public class Main extends Simulation implements Displayable {
 		
 		
 		final XYLineChart chart2 = new XYLineChart("Messages Sent", 125.0, "Messages Sent", "time(s)") ;
-		chart2.setYRange( false, 0, 10000000 ) ;
+		chart2.setYRange( false, 0, 30000000 ) ;
 		chart2.setSeriesLinesAndShapes("s0", true, true) ;
 		
 		Gui.setFrameRectangle("MainFrame", 0, 0, 360, 360);
