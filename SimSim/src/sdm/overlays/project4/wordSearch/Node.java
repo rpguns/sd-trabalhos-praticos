@@ -77,7 +77,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			this.udpSend(nextHop, new PutMessage(m));
 		else {
 			wordDictionary.put(m.getWord(), m.getOrigin());
-			System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
+			//System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
 		}
 	}
 	
