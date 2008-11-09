@@ -42,6 +42,12 @@ public class Main extends Simulation implements Displayable {
 			}
 		};*/
 
+		new PeriodicTask(1.0) {
+			public void run() {
+				NodeDB.randomNode().query( WordsDB.randomWord() ) ;
+			}
+		};
+
 		System.out.println("Init complete...") ;
 		return this ;
 	}

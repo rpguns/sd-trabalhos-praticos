@@ -34,6 +34,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		shape = new Line(pos.x, pos.y, pos.x + 1, pos.y);
 	}
 
+	//Coloca os pares word/endpoint na DHT
 	public void initWordDHT() {
 		for (Word w : words) 
 			onReceive(endpoint, new PutMessage(w,endpoint));
@@ -47,10 +48,15 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		super.setColor(Color.green);
 	}
 
-	public void routeTo( double dst) {
-		onReceive(endpoint, new ChordMessage(dst));
-	}
+//	public void routeTo( double dst) {
+//		onReceive(endpoint, new ChordMessage(dst));
+//	}
 
+	public void query( Word word ) {
+		System.out.println("Node "+endpoint.address.pos+" starting query for Word \""+word.value+"\"...");
+		onReceive(endpoint, new GetMessage(word,endpoint));
+	}
+	
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
 	}
@@ -67,17 +73,36 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, PutMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint) {
-			Node x = (Node) nextHop.handler;
-			System.out.printf("At:%.8f -> dst: %.8f relay-> %.8f\n", chordKey, m.getDst(), x.chordKey);
+		if (nextHop != null && nextHop != this.endpoint)
 			this.udpSend(nextHop, new PutMessage(m));
-		} else {
+		else {
 			wordDictionary.put(m.getWord(), m.getOrigin());
-			System.out.printf("Stopped at: %.8f-> dst: %.8f\n", chordKey, m.getDst());
+			System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
 		}
 	}
 	
-	public void onReceive(EndPoint src, ChordMessage m) {
+	public void onReceive(EndPoint src, GetMessage m) {
+
+		EndPoint nextHop = rtable.nextHop( m.getDst() );
+		if (nextHop != null && nextHop != this.endpoint)
+			this.udpSend(nextHop, new GetMessage(m));
+		else {
+			if (wordDictionary.containsKey(m.getWord()))
+				udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord())) );
+			else
+				udpSend(m.getSender(),new GetReply(m.getWord(),null));
+		}
+	}
+	
+	public void onReceive(EndPoint src, GetReply m) {
+
+		if(m.getNode() != null)
+			System.out.println("Word \""+m.getWord().value+"\" is at Node "+m.getNode().address.pos);
+		else
+			System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
+	}
+	
+/*	public void onReceive(EndPoint src, ChordMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.dst);
 		if (nextHop != null && nextHop != this.endpoint) {
@@ -87,7 +112,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		} else {
 			System.out.printf("Stopped at: %.8f-> dst: %.8f\n", chordKey, m.dst);
 		}
-	}
+	}*/
 
 	/* Implements the Chord Routing Table */
 	class ChordRoutingTable implements Displayable {
