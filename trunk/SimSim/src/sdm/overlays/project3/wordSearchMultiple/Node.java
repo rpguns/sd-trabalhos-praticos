@@ -82,7 +82,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		startedQuery = true;
 		queriedWords.add(new Pair<Word,Integer>(word,expectedResult));
 		super.setColor( Color.BLACK ) ;
-		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),5);
+		SearchQuery thisQuery = new SearchQuery(this.endpoint,word,computeID(this.endpoint,word),3);
 		myQueriesID.add(thisQuery.getID());
 		myQueryAnswers.put(word,new HashSet<EndPoint>());
 		for( EndPoint i : contacts )

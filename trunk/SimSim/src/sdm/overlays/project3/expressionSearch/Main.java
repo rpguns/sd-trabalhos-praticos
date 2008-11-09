@@ -60,7 +60,7 @@ public class Main extends Simulation implements Displayable {
 		chart1.setSeriesLinesAndShapes("s0", true, true) ;
 		
 		final XYLineChart chart2 = new XYLineChart("Messages Sent", 125.0, "Messages Sent", "time(s)") ;
-		chart2.setYRange( false, 0, 10000000 ) ;
+		chart2.setYRange( false, 0, 30000000 ) ;
 		chart2.setSeriesLinesAndShapes("s0", true, true) ;
 		
 		
@@ -93,8 +93,8 @@ public class Main extends Simulation implements Displayable {
 					Node n = NodeDB.randomNode();
 					String pattern1 = generateRegularExpression(n.words.randomElement());
 					String pattern2 = generateRegularExpression(n.words.randomElement());
-					System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
-					
+//					System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
+
 					for( Node i : NodeDB.nodes() ) {
 						Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
 							i.patternizer(pattern1,pattern2);

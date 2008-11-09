@@ -1,9 +1,9 @@
-package sdm.overlays.project4.wordSearch;
+package sdm.overlays.project4.wordSearchMultiple;
 
 import java.awt.*;
 import java.util.*;
 
-import sdm.overlays.project4.wordSearch.msgs.*;
+import sdm.overlays.project4.wordSearchMultiple.msgs.*;
 import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
@@ -14,7 +14,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public long key;
 	public double chordKey;
 	public Set<Word> words;
-	public Map<Double,EndPoint> wordDictionary;
+	public Map<Double,HashSet<EndPoint>> wordDictionary;
 
 	public XY pos;
 	public Line shape;
@@ -26,7 +26,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		key = NodeDB.store(this);
 		chordKey = (double) key / (1L << NodeDB.MAX_KEY_LENGTH);
 		rtable = new ChordRoutingTable(this);
-		wordDictionary = new HashMap<Double,EndPoint>(100);
+		wordDictionary = new HashMap<Double,HashSet<EndPoint>>(100);
+		
 
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
@@ -76,8 +77,11 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		if (nextHop != null && nextHop != this.endpoint)
 			this.udpSend(nextHop, new PutMessage(m));
 		else {
-			wordDictionary.put(m.getWord().dHashValue(), m.getOrigin());
-			//System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
+			HashSet<EndPoint> previous = wordDictionary.get(m.getWord().dHashValue());
+			if (previous == null) previous = new HashSet<EndPoint>();
+			previous.add(m.getOrigin());
+			wordDictionary.put(m.getWord().dHashValue(),previous);
+			System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
 		}
 	}
 	
@@ -96,8 +100,12 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	
 	public void onReceive(EndPoint src, GetReply m) {
 
-		if(m.getNode() != null)
-			System.out.println("Word \""+m.getWord().value+"\" is at Node "+m.getNode().address.pos);
+		if(m.getNodes() != null) {
+			System.out.println("Word \""+m.getWord().value+"\" is at Nodes :");
+			Iterator<EndPoint> i = m.getNodes().iterator();
+			while(i.hasNext())
+				System.out.println(i.next().address.pos);
+		}
 		else
 			System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
 	}
