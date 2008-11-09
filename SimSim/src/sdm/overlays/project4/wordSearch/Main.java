@@ -34,14 +34,13 @@ public class Main extends Simulation implements Displayable {
 		//Initialize the simulation nodes
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
-				
 		
 		//Test of Chord recursive routing to a known node...
-		new PeriodicTask(0.1) {
+		/*new PeriodicTask(0.1) {
 			public void run() {
 				NodeDB.randomNode().routeTo( NodeDB.randomNode().chordKey ) ;
 			}
-		};
+		};*/
 
 		System.out.println("Init complete...") ;
 		return this ;

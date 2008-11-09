@@ -14,6 +14,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public long key;
 	public double chordKey;
 	public Set<Word> words;
+	public Map<Word,EndPoint> wordDictionary;
 
 	public XY pos;
 	public Line shape;
@@ -25,6 +26,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		key = NodeDB.store(this);
 		chordKey = (double) key / (1L << NodeDB.MAX_KEY_LENGTH);
 		rtable = new ChordRoutingTable(this);
+		wordDictionary = new HashMap<Word,EndPoint>(100);
 
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
@@ -32,10 +34,16 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		shape = new Line(pos.x, pos.y, pos.x + 1, pos.y);
 	}
 
+	public void initWordDHT() {
+		for (Word w : words) 
+			onReceive(endpoint, new PutMessage(w,endpoint));
+	}
+	
 	// Populate the node's routing table.
 	public void init() {
 		rtable.populate(NodeDB.nodes());
 		words = WordsDB.randomWords(10);
+		initWordDHT();
 		super.setColor(Color.green);
 	}
 
@@ -52,6 +60,22 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		return Double.toString(chordKey);
 	}
 
+	/*
+	 * MESSAGE HANDLERS
+	 */
+	
+	public void onReceive(EndPoint src, PutMessage m) {
+
+		EndPoint nextHop = rtable.nextHop( m.getDst() );
+		if (nextHop != null && nextHop != this.endpoint) {
+			Node x = (Node) nextHop.handler;
+			System.out.printf("At:%.8f -> dst: %.8f relay-> %.8f\n", chordKey, m.getDst(), x.chordKey);
+			this.udpSend(nextHop, new PutMessage(m));
+		} else {
+			wordDictionary.put(m.getWord(), m.getOrigin());
+			System.out.printf("Stopped at: %.8f-> dst: %.8f\n", chordKey, m.getDst());
+		}
+	}
 	
 	public void onReceive(EndPoint src, ChordMessage m) {
 
