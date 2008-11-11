@@ -13,7 +13,7 @@ import sdm.overlays.words.*;
 
 public class Main extends Simulation implements Displayable {
 	
-	public static final int TOTAL_NODES = 2000 ;
+	public static final int TOTAL_NODES = 1000 ;
 	public static Random generator = new Random();
 
 	public static String generateRegularExpression(Word word) {
@@ -34,7 +34,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(10.0) ;
+		super.setSimulationMaxTimeWarp(2.0) ;
 		
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 		
@@ -56,7 +56,7 @@ public class Main extends Simulation implements Displayable {
 			}
 		};*/
 
-		new PeriodicTask(1.0) {
+		new PeriodicTask(5.0) {
 			public void run() {
 				
 				Node n = NodeDB.randomNode();
@@ -67,7 +67,7 @@ public class Main extends Simulation implements Displayable {
 				
 				//System.out.println("Node: " + n.chordKey +
 									//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
-				n.circulate(WordsDB.randomWord());
+				n.circulate(pattern1,pattern2);
 			}
 		};
 

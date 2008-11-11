@@ -59,9 +59,9 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		onReceive(endpoint, new GetMessage(word,endpoint));
 	}
 	
-	public void circulate( Word word ) {
+	public void circulate(String pattern1,String pattern2) {
 		System.out.println("Node "+endpoint.address.pos+" is drawing a circle...");
-		udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(endpoint,null,null) );
+		udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(endpoint,pattern1,pattern2) );
 	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {
@@ -140,14 +140,25 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 		
 		if (m.getSender().equals(endpoint))
-			System.out.println("Circle was succesfully drawn at Node "+endpoint.address.pos+" with perimeter "+m.getHopCount());
+			if(m.getMatchingResults().size() > 0) {
+				System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
+				Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
+				while(i.hasNext())
+					System.out.println(i.next().address.pos);
+			}
+			else
+				System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
 		else {
-			
 			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
 				patternizer(m.getPattern1(),m.getPattern2());
 			
-			
-			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,new Pair<Word,Word>(matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst())));
+			Pair<Word,Word> matchingWords = null;
+			if (matchingResults != null)
+				matchingWords = new Pair<Word,Word>(
+						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
+
+			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
+
 		}
 	}
 	
