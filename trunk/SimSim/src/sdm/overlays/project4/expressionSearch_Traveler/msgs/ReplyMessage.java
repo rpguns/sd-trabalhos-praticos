@@ -1,7 +1,6 @@
 package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 
 import java.awt.* ;
-import java.util.HashSet;
 import java.util.Map;
 
 import sdm.overlays.project4.expressionSearch.*;
@@ -36,6 +35,10 @@ public class ReplyMessage extends Message {
 	
 	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
 		return matchingResults;
+	}
+	
+	public int getHopCount() {
+		return hopCount;
 	}
 	
 	/* (non-Javadoc)
