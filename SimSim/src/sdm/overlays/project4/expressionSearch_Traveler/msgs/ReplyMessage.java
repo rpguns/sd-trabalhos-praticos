@@ -3,8 +3,7 @@ package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 import java.awt.* ;
 import java.util.Map;
 
-import sdm.overlays.project4.expressionSearch.*;
-import sdm.overlays.project4.expressionSearch_Traveler.Pair;
+import sdm.overlays.project4.expressionSearch_Traveler.*;
 import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
@@ -15,14 +14,16 @@ import static simsim.core.Simulation.* ;
 public class ReplyMessage extends Message {
 	
 	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
+	protected int nNodes;
 	protected String pattern1,pattern2;
 	protected int hopCount = 1;
 	
-	public ReplyMessage( String pattern1, String pattern2, Map<EndPoint,Pair<Word,Word>> matchingResults ) {
+	public ReplyMessage( String pattern1, String pattern2, Map<EndPoint,Pair<Word,Word>> matchingResults, int nNodes ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 		this.matchingResults = matchingResults;
 		this.pattern1 = pattern1;
 		this.pattern2 = pattern2;
+		this.nNodes = nNodes;
 	}
 	
 	public String getPattern1() {
@@ -37,8 +38,8 @@ public class ReplyMessage extends Message {
 		return matchingResults;
 	}
 	
-	public int getHopCount() {
-		return hopCount;
+	public int getNodes() {
+		return nNodes;
 	}
 	
 	/* (non-Javadoc)

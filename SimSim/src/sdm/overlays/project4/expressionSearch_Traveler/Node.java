@@ -14,6 +14,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	final static int LEVEL_DEPTH = 2;
 	
+	protected int test = 0;
 	public long key;
 	public double chordKey;
 	public RandomList<Word> words;
@@ -57,13 +58,17 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //	}
 
 	public void circularQuery(String p1, String p2) {
-		this.travel(endpoint,p1,p2,-1,rtable.fingers[0].endpoint,LEVEL_DEPTH);
+		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,LEVEL_DEPTH);
+		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,LEVEL_DEPTH));
 	}
 	
 	public void travel( EndPoint returnPath, String p1, String p2, int nFinger, EndPoint destination, int currentLevel) {
 		
+		//System.out.println("Entering travel level " + currentLevel);
 		//Caso base
 		if (currentLevel == 0) {
+			test++;
+			//System.out.println(" at sending no " + test);
 			onReceive(endpoint, new CircularMessage(returnPath,p1,p2,destination));
 		} else {
 			
@@ -73,7 +78,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			
 			//Recursividade distribuida
 			udpSend(rtable.fingers[nFinger+1].endpoint, 
-					new TravelMessage(returnPath,p1,p2,nFinger,destination,currentLevel-1));
+					new TravelMessage(returnPath,p1,p2,nFinger+1,destination,currentLevel-1));
 		}
 		
 	}
@@ -135,7 +140,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, CircularMessage m) {
 
 		if (m.getDestination().equals(endpoint))
-			udpSend(m.getReturnPath(),new ReplyMessage(Integer.toString(m.getHopCount()),null,null));
+			udpSend(m.getReturnPath(),new ReplyMessage(null,null,null,m.getHopCount()));
 		else {
 	
 			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,null));
@@ -146,7 +151,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, ReplyMessage m) {
 
 		System.out.println("Node "+endpoint.address.pos+" received a reply from "+
-				src.address.pos+" with a knowledge of "+m.getHopCount()+" nodes");
+				src.address.pos+" with a knowledge of "+m.getNodes()+" nodes");
 	}
 	
 //	public void onReceive(EndPoint src, GetMessage m) {
