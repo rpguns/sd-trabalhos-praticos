@@ -1,9 +1,9 @@
 package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 
 import java.awt.* ;
-import java.util.HashSet;
+import java.util.*;
 
-import sdm.overlays.project4.expressionSearch.*;
+import sdm.overlays.project4.expressionSearch_Traveler.*;
 import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
@@ -11,30 +11,48 @@ import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class GetReply extends Message {
+public class CircularMessage extends Message {
 	
-	protected Word word;
-	protected HashSet<EndPoint> nodes;
+	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
+	protected String pattern1,pattern2;
+	protected EndPoint sender;
 	protected int hopCount = 1;
 	
-	public GetReply( Word word, HashSet<EndPoint> nodes ) {
+	public CircularMessage( EndPoint sender, String pattern1, String pattern2 ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.word = word;
-		this.nodes = nodes;
+		this.matchingResults = new HashMap<EndPoint,Pair<Word,Word>>(20);
+		this.sender = sender;
+		this.pattern1 = pattern1;
+		this.pattern2 = pattern2;
 	}
 	
-	public GetReply( GetReply other ) {
-		this( other.getWord(), other.getNodes() ) ;
+	public CircularMessage( CircularMessage other, EndPoint newNode ,Pair<Word,Word> newNodeResults ) {
+		this( other.getSender(), other.getPattern1(), other.getPattern2() ) ;
 		this.color = other.color ;
 		this.hopCount = other.hopCount + 1 ;
+		this.matchingResults.putAll(other.matchingResults);
+		if (newNodeResults != null)
+			this.matchingResults.put(newNode,newNodeResults);
 	}
 	
-	public Word getWord() {
-		return word;
+	public int getHopCount() {
+		return hopCount;
 	}
 	
-	public HashSet<EndPoint> getNodes() {
-		return nodes;
+	public String getPattern1() {
+		return pattern1;
+	}
+	
+	public String getPattern2() {
+		return pattern2;
+	}
+	
+	public EndPoint getSender() {
+		return sender;
+	}
+	
+	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
+		return matchingResults;
 	}
 	
 	/* (non-Javadoc)

@@ -67,7 +67,7 @@ public class Main extends Simulation implements Displayable {
 				
 				//System.out.println("Node: " + n.chordKey +
 									//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
-				n.circulate(pattern1,pattern2);
+				//n.circulate(pattern1,pattern2);
 			}
 		};
 

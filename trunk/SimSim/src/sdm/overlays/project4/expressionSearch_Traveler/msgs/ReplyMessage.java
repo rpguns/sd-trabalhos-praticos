@@ -1,6 +1,7 @@
 package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 
 import java.awt.* ;
+import java.util.HashSet;
 
 import sdm.overlays.project4.expressionSearch.*;
 import sdm.overlays.words.*;
@@ -10,22 +11,20 @@ import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class GetMessage extends Message {
+public class ReplyMessage extends Message {
 	
 	protected Word word;
-	protected EndPoint sender;
-	protected double dst;
+	protected HashSet<EndPoint> nodes;
 	protected int hopCount = 1;
 	
-	public GetMessage( Word word, EndPoint sender ) {
+	public ReplyMessage( Word word, HashSet<EndPoint> nodes ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 		this.word = word;
-		this.sender = sender;
-		this.dst = word.dHashValue();
+		this.nodes = nodes;
 	}
 	
-	public GetMessage( GetMessage other ) {
-		this( other.getWord(), other.getSender() ) ;
+	public ReplyMessage( ReplyMessage other ) {
+		this( other.getWord(), other.getNodes() ) ;
 		this.color = other.color ;
 		this.hopCount = other.hopCount + 1 ;
 	}
@@ -34,12 +33,8 @@ public class GetMessage extends Message {
 		return word;
 	}
 	
-	public EndPoint getSender() {
-		return sender;
-	}
-	
-	public double getDst() {
-		return dst;
+	public HashSet<EndPoint> getNodes() {
+		return nodes;
 	}
 	
 	/* (non-Javadoc)
