@@ -12,13 +12,15 @@ import simsim.gui.geom.*;
 
 public class Node extends AbstractNode implements ExtendedMessageHandler, Displayable {
 
-	final static int LEVEL_DEPTH = 2;
+	final static int PARTITION_LEVELS = 4;
 	
 	protected int test = 0;
 	public long key;
 	public double chordKey;
 	public RandomList<Word> words;
 	public Map<Double,HashSet<EndPoint>> wordDictionary;
+	public Map< Pair<String,String>, Map<EndPoint,Pair<Word,Word>> > queryBuffers;
+	public Map< Pair<String,String>, Integer> queryTimers;
 
 	public XY pos;
 	public Line shape;
@@ -31,8 +33,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		chordKey = (double) key / (1L << NodeDB.MAX_KEY_LENGTH);
 		rtable = new ChordRoutingTable(this);
 		wordDictionary = new HashMap<Double,HashSet<EndPoint>>(100);
+		queryBuffers = new HashMap< Pair<String,String>, Map<EndPoint,Pair<Word,Word>> >(10);
 		
-
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
 		pos = new XY(500 + R * Math.cos(a), 500 + R * Math.sin(a));
@@ -49,7 +51,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void init() {
 		rtable.populate(NodeDB.nodes());
 		words = new RandomList<Word>(WordsDB.randomWords(10));
-		initWordDHT();
+		//initWordDHT();
 		super.setColor(Color.green);
 	}
 
@@ -58,22 +60,26 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //	}
 
 	public void circularQuery(String p1, String p2) {
-		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,LEVEL_DEPTH);
-		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,LEVEL_DEPTH));
+		Pair<String,String> queryKey = new Pair<String,String>(p1,p2);
+		queryBuffers.put(queryKey,
+				new HashMap<EndPoint,Pair<Word,Word>>(10));
+		queryTimers.put(queryKey, 0);
+		
+		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,PARTITION_LEVELS-1);
+		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,PARTITION_LEVELS-1));
 	}
 	
 	public void travel( EndPoint returnPath, String p1, String p2, int nFinger, EndPoint destination, int currentLevel) {
 		
-		//System.out.println("Entering travel level " + currentLevel);
 		//Caso base
 		if (currentLevel == 0) {
-			test++;
-			//System.out.println(" at sending no " + test);
+			
 			onReceive(endpoint, new CircularMessage(returnPath,p1,p2,destination));
+			
 		} else {
 			
 			//Recursividade local
-			this.travel(returnPath, p1, p2, nFinger, 
+			this.travel(returnPath, p1, p2, nFinger+1, 
 					rtable.fingers[nFinger+1].endpoint, currentLevel-1);
 			
 			//Recursividade distribuida
@@ -142,9 +148,16 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		if (m.getDestination().equals(endpoint))
 			udpSend(m.getReturnPath(),new ReplyMessage(null,null,null,m.getHopCount()));
 		else {
-	
-			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,null));
-
+			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
+				patternizer(m.getPattern1(),m.getPattern2());
+			
+			Pair<Word,Word> matchingWords = null;
+			if (matchingResults != null)
+				matchingWords = new Pair<Word,Word>(
+						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
+			
+			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,matchingWords));
+			setColor(m.getColor());
 		}
 	}
 	
@@ -152,6 +165,19 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 		System.out.println("Node "+endpoint.address.pos+" received a reply from "+
 				src.address.pos+" with a knowledge of "+m.getNodes()+" nodes");
+		Pair<String,String> queryKey = 
+			new Pair<String,String>(m.getPattern1(),m.getPattern2());
+		
+		Map<EndPoint,Pair<Word,Word>> receivedPatterns = 
+			queryBuffers.get(queryKey);
+		receivedPatterns.putAll(m.getMatchingResults());
+		
+		queryTimers.put(queryKey,queryTimers.get(queryKey)+1);
+		if (queryTimers.get(queryKey) == Math.pow(2,PARTITION_LEVELS)) {
+			
+			
+			
+		}
 	}
 	
 //	public void onReceive(EndPoint src, GetMessage m) {

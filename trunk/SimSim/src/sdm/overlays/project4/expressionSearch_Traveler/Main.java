@@ -14,7 +14,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 300 ;
+	public static final int TOTAL_NODES = 2000 ;
 	public static Random generator = new Random();
 
 	public static String generateRegularExpression(Word word) {
@@ -35,7 +35,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(0.05) ;
+		super.setSimulationMaxTimeWarp(0.2) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
@@ -60,7 +60,7 @@ public class Main extends Simulation implements Displayable {
 		new PeriodicTask(1.0) {
 			public void run() {
 
-				if (delay % 6 == 0) {
+				if (delay % 8 == 0) {
 					Node n = NodeDB.randomNode();
 					String pattern1 = generateRegularExpression(n.words.randomElement());
 					String pattern2 = generateRegularExpression(n.words.randomElement());
@@ -69,9 +69,10 @@ public class Main extends Simulation implements Displayable {
 
 					//System.out.println("Node: " + n.chordKey +
 					//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
+					System.out.println("Starting query from node " + n.chordKey);
 					n.circularQuery(pattern1,pattern2);
 					
-				}
+				} 
 				delay++;
 			}
 		};
