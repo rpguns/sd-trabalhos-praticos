@@ -16,6 +16,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public double chordKey;
 	public RandomList<Word> words;
 	public Map<Double,HashSet<EndPoint>> wordDictionary;
+	public int messagesSent;
+	public int answeredQueries;
 
 	public XY pos;
 	public Line shape;
@@ -28,6 +30,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		chordKey = (double) key / (1L << NodeDB.MAX_KEY_LENGTH);
 		rtable = new ChordRoutingTable(this);
 		wordDictionary = new HashMap<Double,HashSet<EndPoint>>(100);
+		messagesSent = 0;
+		answeredQueries = 0;
 		
 
 		final double R = 450.0;
@@ -62,6 +66,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void circulate(String pattern1,String pattern2) {
 		System.out.println("Node "+endpoint.address.pos+" is drawing a circle...");
 		udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(endpoint,pattern1,pattern2) );
+		messagesSent++;
 	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {
@@ -100,8 +105,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, PutMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint)
+		if (nextHop != null && nextHop != this.endpoint) {
 			this.udpSend(nextHop, new PutMessage(m));
+			messagesSent++;
+		}
 		else {
 			HashSet<EndPoint> previous = wordDictionary.get(m.getWord().dHashValue());
 			if (previous == null) previous = new HashSet<EndPoint>();
@@ -114,14 +121,16 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, GetMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint)
+		if (nextHop != null && nextHop != this.endpoint) {
 			this.udpSend(nextHop, new GetMessage(m));
+		}
 		else {
 			if (wordDictionary.containsKey(m.getWord().dHashValue()))
 				udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
 			else
 				udpSend(m.getSender(),new GetReply(m.getWord(),null));
 		}
+		messagesSent++;
 	}
 	
 	public void onReceive(EndPoint src, GetReply m) {
@@ -139,7 +148,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, CircularGetMessage m) {
 
 		
-		if (m.getSender().equals(endpoint))
+		if (m.getSender().equals(endpoint)) {
+			answeredQueries++;
 			if(m.getMatchingResults().size() > 0) {
 				System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
 				Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
@@ -148,6 +158,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			}
 			else
 				System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
+		}
 		else {
 			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
 				patternizer(m.getPattern1(),m.getPattern2());
@@ -158,7 +169,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
 
 			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
-
+			messagesSent++;
 		}
 	}
 	
