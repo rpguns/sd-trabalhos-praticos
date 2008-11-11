@@ -30,6 +30,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		rtable = new ChordRoutingTable(this);
 		wordDictionary = new HashMap<Double,EndPoint>(100);
 		messagesSent = 0;
+		answeredQueries = 0;
 		
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
