@@ -13,26 +13,18 @@ import static simsim.core.Simulation.* ;
 
 public class TravelMessage extends Message {
 	
-	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
+	protected int level;
 	protected String pattern1,pattern2;
-	protected EndPoint sender;
+	protected EndPoint returnPath,destination;
 	protected int hopCount = 1;
 	
-	public TravelMessage( EndPoint sender, String pattern1, String pattern2 ) {
+	public TravelMessage( EndPoint returnPath, String pattern1, String pattern2, EndPoint destination, int level ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.matchingResults = new HashMap<EndPoint,Pair<Word,Word>>(20);
-		this.sender = sender;
+		this.returnPath = returnPath;
+		this.destination = destination;
 		this.pattern1 = pattern1;
 		this.pattern2 = pattern2;
-	}
-	
-	public TravelMessage( TravelMessage other, EndPoint newNode ,Pair<Word,Word> newNodeResults ) {
-		this( other.getSender(), other.getPattern1(), other.getPattern2() ) ;
-		this.color = other.color ;
-		this.hopCount = other.hopCount + 1 ;
-		this.matchingResults.putAll(other.matchingResults);
-		if (newNodeResults != null)
-			this.matchingResults.put(newNode,newNodeResults);
+		this.level = level;
 	}
 	
 	public int getHopCount() {
@@ -47,12 +39,16 @@ public class TravelMessage extends Message {
 		return pattern2;
 	}
 	
-	public EndPoint getSender() {
-		return sender;
+	public EndPoint getReturnPath() {
+		return returnPath;
 	}
 	
-	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
-		return matchingResults;
+	public EndPoint getDestination() {
+		return destination;
+	}
+	
+	public int getLevel() {
+		return level;
 	}
 	
 	/* (non-Javadoc)

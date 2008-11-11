@@ -15,19 +15,20 @@ public class CircularMessage extends Message {
 	
 	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
 	protected String pattern1,pattern2;
-	protected EndPoint sender;
+	protected EndPoint returnPath,destination;
 	protected int hopCount = 1;
 	
-	public CircularMessage( EndPoint sender, String pattern1, String pattern2 ) {
+	public CircularMessage( EndPoint returnPath, String pattern1, String pattern2, EndPoint destination ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 		this.matchingResults = new HashMap<EndPoint,Pair<Word,Word>>(20);
-		this.sender = sender;
+		this.returnPath = returnPath;
+		this.destination = destination;
 		this.pattern1 = pattern1;
 		this.pattern2 = pattern2;
 	}
 	
 	public CircularMessage( CircularMessage other, EndPoint newNode ,Pair<Word,Word> newNodeResults ) {
-		this( other.getSender(), other.getPattern1(), other.getPattern2() ) ;
+		this( other.getReturnPath(), other.getPattern1(), other.getPattern2(), other.getDestination() ) ;
 		this.color = other.color ;
 		this.hopCount = other.hopCount + 1 ;
 		this.matchingResults.putAll(other.matchingResults);
@@ -47,8 +48,12 @@ public class CircularMessage extends Message {
 		return pattern2;
 	}
 	
-	public EndPoint getSender() {
-		return sender;
+	public EndPoint getReturnPath() {
+		return returnPath;
+	}
+	
+	public EndPoint getDestination() {
+		return destination;
 	}
 	
 	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
