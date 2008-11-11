@@ -14,7 +14,21 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 	
 	public static final int TOTAL_NODES = 2000 ;
+	public static Random generator = new Random();
 
+	public static String generateRegularExpression(Word word) {
+		String wordValue = word.value;
+		int breakingPoint = generator.nextInt(wordValue.length()-2)+1;
+		
+		if (generator.nextBoolean()) {
+			String basePattern = wordValue.substring(0,breakingPoint);
+			return basePattern+".*";
+		} else {
+			String basePattern = wordValue.substring(breakingPoint);
+			return ".*"+basePattern;
+		}
+	}
+	
 	Main() {
 		super( 10, EnumSet.of( DisplayFlags.SIMULATION, DisplayFlags.TIME, DisplayFlags.TRAFFIC ) ) ;
 	}
@@ -44,7 +58,13 @@ public class Main extends Simulation implements Displayable {
 
 		new PeriodicTask(1.0) {
 			public void run() {
+				
 				Node n = NodeDB.randomNode();
+				String pattern1 = generateRegularExpression(n.words.randomElement());
+				String pattern2 = generateRegularExpression(n.words.randomElement());
+//				System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
+
+				
 				//System.out.println("Node: " + n.chordKey +
 									//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
 				n.circulate(WordsDB.randomWord());
