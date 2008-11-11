@@ -3,6 +3,7 @@ package sdm.overlays.project4.expressionSearch;
 import java.awt.*;
 import java.util.*;
 
+
 import sdm.overlays.project4.expressionSearch.msgs.*;
 import sdm.overlays.words.*;
 import simsim.core.*;
@@ -13,7 +14,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public long key;
 	public double chordKey;
-	public Set<Word> words;
+	public RandomList<Word> words;
 	public Map<Double,HashSet<EndPoint>> wordDictionary;
 
 	public XY pos;
@@ -44,7 +45,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	// Populate the node's routing table.
 	public void init() {
 		rtable.populate(NodeDB.nodes());
-		words = WordsDB.randomWords(10);
+		words = new RandomList<Word>(WordsDB.randomWords(10));
 		initWordDHT();
 		super.setColor(Color.green);
 	}
@@ -75,6 +76,26 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	/*
 	 * MESSAGE HANDLERS
 	 */
+	
+	public Pair<Word,String> matchExpression(String expression) {
+		Word matchedWord = null;
+		for (Word w : words) {
+			if (w.value.matches(expression))
+				matchedWord = w;
+		}
+		if (matchedWord != null)
+			return new Pair<Word,String>(matchedWord,expression);
+		return null;
+	}
+	
+	public Pair<Pair<Word,String>,Pair<Word,String>> patternizer(String pat1, String pat2) {
+
+		Pair<Word,String> matchingPair1 = matchExpression(pat1);
+		Pair<Word,String> matchingPair2 = matchExpression(pat2);
+		if (matchingPair1 != null && matchingPair2 != null)
+			return new Pair<Pair<Word,String>,Pair<Word,String>>(matchingPair1,matchingPair2);
+		return null;
+	}
 	
 	public void onReceive(EndPoint src, PutMessage m) {
 
@@ -117,10 +138,16 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	
 	public void onReceive(EndPoint src, CircularGetMessage m) {
 
+		
 		if (m.getSender().equals(endpoint))
 			System.out.println("Circle was succesfully drawn at Node "+endpoint.address.pos+" with perimeter "+m.getHopCount());
 		else {
-			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,null));
+			
+			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
+				patternizer(m.getPattern1(),m.getPattern2());
+			
+			
+			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,new Pair<Word,Word>(matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst())));
 		}
 	}
 	
