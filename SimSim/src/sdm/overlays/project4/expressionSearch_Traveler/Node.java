@@ -12,6 +12,8 @@ import simsim.gui.geom.*;
 
 public class Node extends AbstractNode implements ExtendedMessageHandler, Displayable {
 
+	final static int LEVEL_DEPTH = 2;
+	
 	public long key;
 	public double chordKey;
 	public RandomList<Word> words;
@@ -54,6 +56,19 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //		onReceive(endpoint, new ChordMessage(dst));
 //	}
 
+	public void circularQuery(String p1, String p2) {
+		this.travel(endpoint,p1,p2,-1,rtable.fingers[0].endpoint,LEVEL_DEPTH);
+	}
+	
+	public void travel( EndPoint returnPath, String p1, String p2, int nFingers, EndPoint destination, int currentLevel) {
+		
+		if (currentLevel == 0) {
+			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularMessage(returnPath,p1,p2,destination));
+		} else {
+			
+		}
+		
+	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
