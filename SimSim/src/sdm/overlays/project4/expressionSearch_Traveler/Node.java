@@ -60,12 +60,20 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		this.travel(endpoint,p1,p2,-1,rtable.fingers[0].endpoint,LEVEL_DEPTH);
 	}
 	
-	public void travel( EndPoint returnPath, String p1, String p2, int nFingers, EndPoint destination, int currentLevel) {
+	public void travel( EndPoint returnPath, String p1, String p2, int nFinger, EndPoint destination, int currentLevel) {
 		
+		//Caso base
 		if (currentLevel == 0) {
-			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularMessage(returnPath,p1,p2,destination));
+			onReceive(endpoint, new CircularMessage(returnPath,p1,p2,destination));
 		} else {
 			
+			//Recursividade local
+			this.travel(returnPath, p1, p2, nFinger, 
+					rtable.fingers[nFinger+1].endpoint, currentLevel-1);
+			
+			//Recursividade distribuida
+			udpSend(rtable.fingers[nFinger+1].endpoint, 
+					new TravelMessage(returnPath,p1,p2,nFinger,destination,currentLevel-1));
 		}
 		
 	}
@@ -119,17 +127,26 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	
 	public void onReceive(EndPoint src, TravelMessage m) {
 
-		//TODO
+		this.travel(m.getReturnPath(), m.getPattern1(), m.getPattern2(), 
+				m.getFingerNumber(), m.getDestination(), m.getLevel());
+
 	}
 	
 	public void onReceive(EndPoint src, CircularMessage m) {
 
-		//TODO
+		if (m.getDestination().equals(endpoint))
+			udpSend(m.getReturnPath(),new ReplyMessage(Integer.toString(m.getHopCount()),null,null));
+		else {
+	
+			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,null));
+
+		}
 	}
 	
 	public void onReceive(EndPoint src, ReplyMessage m) {
 
-		//TODO
+		System.out.println("Node "+endpoint.address.pos+" received a reply from "+
+				src.address.pos+" with a knowledge of "+m.getHopCount()+" nodes");
 	}
 	
 //	public void onReceive(EndPoint src, GetMessage m) {

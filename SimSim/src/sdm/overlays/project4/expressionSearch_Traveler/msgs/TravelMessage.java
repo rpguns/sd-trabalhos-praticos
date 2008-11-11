@@ -1,10 +1,8 @@
 package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 
 import java.awt.* ;
-import java.util.*;
 
 import sdm.overlays.project4.expressionSearch_Traveler.*;
-import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
@@ -13,18 +11,19 @@ import static simsim.core.Simulation.* ;
 
 public class TravelMessage extends Message {
 	
-	protected int level;
+	protected int level,fingerNumber;
 	protected String pattern1,pattern2;
 	protected EndPoint returnPath,destination;
 	protected int hopCount = 1;
 	
-	public TravelMessage( EndPoint returnPath, String pattern1, String pattern2, EndPoint destination, int level ) {
+	public TravelMessage( EndPoint returnPath, String pattern1, String pattern2, int fingerNumber, EndPoint destination, int level ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 		this.returnPath = returnPath;
 		this.destination = destination;
 		this.pattern1 = pattern1;
 		this.pattern2 = pattern2;
 		this.level = level;
+		this.fingerNumber = fingerNumber;
 	}
 	
 	public int getHopCount() {
@@ -49,6 +48,10 @@ public class TravelMessage extends Message {
 	
 	public int getLevel() {
 		return level;
+	}
+	
+	public int getFingerNumber() {
+		return fingerNumber;
 	}
 	
 	/* (non-Javadoc)
