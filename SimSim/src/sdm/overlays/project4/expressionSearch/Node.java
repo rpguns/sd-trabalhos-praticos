@@ -86,7 +86,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			if (previous == null) previous = new HashSet<EndPoint>();
 			previous.add(m.getOrigin());
 			wordDictionary.put(m.getWord().dHashValue(),previous);
-			System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
+			//System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
 		}
 	}
 	
