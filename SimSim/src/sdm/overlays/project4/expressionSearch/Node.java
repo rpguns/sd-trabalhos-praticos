@@ -58,6 +58,11 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		onReceive(endpoint, new GetMessage(word,endpoint));
 	}
 	
+	public void circulate( Word word ) {
+		System.out.println("Node "+endpoint.address.pos+" is drawing a circle...");
+		udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(endpoint,null,null) );
+	}
+	
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
 	}
@@ -108,6 +113,15 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 		else
 			System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
+	}
+	
+	public void onReceive(EndPoint src, CircularGetMessage m) {
+
+		if (m.getSender().equals(endpoint))
+			System.out.println("Circle was succesfully drawn at Node "+endpoint.address.pos+" with perimeter "+m.getHopCount());
+		else {
+			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,null));
+		}
 	}
 	
 /*	public void onReceive(EndPoint src, ChordMessage m) {
