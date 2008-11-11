@@ -1,28 +1,58 @@
 package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 
 import java.awt.* ;
+import java.util.*;
 
-import sdm.overlays.project4.expressionSearch.*;
+import sdm.overlays.project4.expressionSearch_Traveler.*;
+import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class ChordMessage extends Message {
+public class TravelMessage extends Message {
 	
-	public double dst ;
-	private int hopCount = 1 ;
+	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
+	protected String pattern1,pattern2;
+	protected EndPoint sender;
+	protected int hopCount = 1;
 	
-	public ChordMessage( double dst ) {
+	public TravelMessage( EndPoint sender, String pattern1, String pattern2 ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.dst = dst ;
+		this.matchingResults = new HashMap<EndPoint,Pair<Word,Word>>(20);
+		this.sender = sender;
+		this.pattern1 = pattern1;
+		this.pattern2 = pattern2;
 	}
 	
-	public ChordMessage( ChordMessage other ) {
-		this( other.dst ) ;
+	public TravelMessage( TravelMessage other, EndPoint newNode ,Pair<Word,Word> newNodeResults ) {
+		this( other.getSender(), other.getPattern1(), other.getPattern2() ) ;
 		this.color = other.color ;
 		this.hopCount = other.hopCount + 1 ;
+		this.matchingResults.putAll(other.matchingResults);
+		if (newNodeResults != null)
+			this.matchingResults.put(newNode,newNodeResults);
+	}
+	
+	public int getHopCount() {
+		return hopCount;
+	}
+	
+	public String getPattern1() {
+		return pattern1;
+	}
+	
+	public String getPattern2() {
+		return pattern2;
+	}
+	
+	public EndPoint getSender() {
+		return sender;
+	}
+	
+	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
+		return matchingResults;
 	}
 	
 	/* (non-Javadoc)

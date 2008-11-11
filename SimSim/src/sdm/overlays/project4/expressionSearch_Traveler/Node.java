@@ -54,15 +54,6 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //		onReceive(endpoint, new ChordMessage(dst));
 //	}
 
-	public void query( Word word ) {
-		System.out.println("Node "+endpoint.address.pos+" starting query for Word \""+word.value+"\"...");
-		onReceive(endpoint, new GetMessage(word,endpoint));
-	}
-	
-	public void circulate(String pattern1,String pattern2) {
-		System.out.println("Node "+endpoint.address.pos+" is drawing a circle...");
-		udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(endpoint,pattern1,pattern2) );
-	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
@@ -111,68 +102,72 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 	}
 	
-	public void onReceive(EndPoint src, GetMessage m) {
+	public void onReceive(EndPoint src, TravelMessage m) {
 
-		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint)
-			this.udpSend(nextHop, new GetMessage(m));
-		else {
-			if (wordDictionary.containsKey(m.getWord().dHashValue()))
-				udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
-			else
-				udpSend(m.getSender(),new GetReply(m.getWord(),null));
-		}
+		//TODO
 	}
 	
-	public void onReceive(EndPoint src, GetReply m) {
+	public void onReceive(EndPoint src, CircularMessage m) {
 
-		if(m.getNodes() != null) {
-			System.out.println("Word \""+m.getWord().value+"\" is at Nodes :");
-			Iterator<EndPoint> i = m.getNodes().iterator();
-			while(i.hasNext())
-				System.out.println(i.next().address.pos);
-		}
-		else
-			System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
+		//TODO
 	}
 	
-	public void onReceive(EndPoint src, CircularGetMessage m) {
+	public void onReceive(EndPoint src, ReplyMessage m) {
 
-		
-		if (m.getSender().equals(endpoint))
-			if(m.getMatchingResults().size() > 0) {
-				System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
-				Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
-				while(i.hasNext())
-					System.out.println(i.next().address.pos);
-			}
-			else
-				System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
-		else {
-			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
-				patternizer(m.getPattern1(),m.getPattern2());
-			
-			Pair<Word,Word> matchingWords = null;
-			if (matchingResults != null)
-				matchingWords = new Pair<Word,Word>(
-						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
-
-			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
-
-		}
+		//TODO
 	}
 	
-/*	public void onReceive(EndPoint src, ChordMessage m) {
-
-		EndPoint nextHop = rtable.nextHop( m.dst);
-		if (nextHop != null && nextHop != this.endpoint) {
-			Node x = (Node) nextHop.handler;
-			System.out.printf("At:%.8f -> dst: %.8f relay-> %.8f\n", chordKey, m.dst, x.chordKey);
-			this.udpSend(nextHop, new ChordMessage(m));
-		} else {
-			System.out.printf("Stopped at: %.8f-> dst: %.8f\n", chordKey, m.dst);
-		}
-	}*/
+//	public void onReceive(EndPoint src, GetMessage m) {
+//
+//		EndPoint nextHop = rtable.nextHop( m.getDst() );
+//		if (nextHop != null && nextHop != this.endpoint)
+//			this.udpSend(nextHop, new GetMessage(m));
+//		else {
+//			if (wordDictionary.containsKey(m.getWord().dHashValue()))
+//				udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
+//			else
+//				udpSend(m.getSender(),new GetReply(m.getWord(),null));
+//		}
+//	}
+//	
+//	public void onReceive(EndPoint src, GetReply m) {
+//
+//		if(m.getNodes() != null) {
+//			System.out.println("Word \""+m.getWord().value+"\" is at Nodes :");
+//			Iterator<EndPoint> i = m.getNodes().iterator();
+//			while(i.hasNext())
+//				System.out.println(i.next().address.pos);
+//		}
+//		else
+//			System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
+//	}
+//	
+//	public void onReceive(EndPoint src, CircularGetMessage m) {
+//
+//		
+//		if (m.getSender().equals(endpoint))
+//			if(m.getMatchingResults().size() > 0) {
+//				System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
+//				Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
+//				while(i.hasNext())
+//					System.out.println(i.next().address.pos);
+//			}
+//			else
+//				System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
+//		else {
+//			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
+//				patternizer(m.getPattern1(),m.getPattern2());
+//			
+//			Pair<Word,Word> matchingWords = null;
+//			if (matchingResults != null)
+//				matchingWords = new Pair<Word,Word>(
+//						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
+//
+//			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
+//
+//		}
+//	}
+	
 
 	/* Implements the Chord Routing Table */
 	class ChordRoutingTable implements Displayable {
