@@ -13,7 +13,7 @@ import simsim.gui.geom.*;
 public class Node extends AbstractNode implements ExtendedMessageHandler, Displayable {
 
 	final static int PARTITION_LEVELS = 4;
-	
+
 	protected int test = 0;
 	public long key;
 	public double chordKey;
@@ -34,7 +34,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		rtable = new ChordRoutingTable(this);
 		wordDictionary = new HashMap<Double,HashSet<EndPoint>>(100);
 		queryBuffers = new HashMap< Pair<String,String>, Map<EndPoint,Pair<Word,Word>> >(10);
-		
+		queryTimers = new HashMap< Pair<String,String>, Integer>(10);
+
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
 		pos = new XY(500 + R * Math.cos(a), 500 + R * Math.sin(a));
@@ -46,7 +47,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		for (Word w : words) 
 			onReceive(endpoint, new PutMessage(w,endpoint));
 	}
-	
+
 	// Populate the node's routing table.
 	public void init() {
 		rtable.populate(NodeDB.nodes());
@@ -56,7 +57,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	}
 
 //	public void routeTo( double dst) {
-//		onReceive(endpoint, new ChordMessage(dst));
+//	onReceive(endpoint, new ChordMessage(dst));
 //	}
 
 	public void circularQuery(String p1, String p2) {
@@ -64,36 +65,36 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		queryBuffers.put(queryKey,
 				new HashMap<EndPoint,Pair<Word,Word>>(10));
 		queryTimers.put(queryKey, 0);
-		
+
 		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,PARTITION_LEVELS-1);
 		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,PARTITION_LEVELS-1));
 	}
-	
+
 	public void travel( EndPoint returnPath, String p1, String p2, int nFinger, EndPoint destination, int currentLevel) {
-		
+
 		//Caso base
 		if (currentLevel == 0) {
-			
+
 			onReceive(endpoint, new CircularMessage(returnPath,p1,p2,destination));
-			
+
 		} else {
-			
+
 			//Recursividade local
 			this.travel(returnPath, p1, p2, nFinger+1, 
 					rtable.fingers[nFinger+1].endpoint, currentLevel-1);
-			
+
 			//Recursividade distribuida
 			udpSend(rtable.fingers[nFinger+1].endpoint, 
 					new TravelMessage(returnPath,p1,p2,nFinger+1,destination,currentLevel-1));
 		}
-		
+
 	}
-	
+
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
 	}
 
-	
+
 	public String toString() {
 		return Double.toString(chordKey);
 	}
@@ -101,7 +102,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	/*
 	 * MESSAGE HANDLERS
 	 */
-	
+
 	public Pair<Word,String> matchExpression(String expression) {
 		Word matchedWord = null;
 		for (Word w : words) {
@@ -112,7 +113,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			return new Pair<Word,String>(matchedWord,expression);
 		return null;
 	}
-	
+
 	public Pair<Pair<Word,String>,Pair<Word,String>> patternizer(String pat1, String pat2) {
 
 		Pair<Word,String> matchingPair1 = matchExpression(pat1);
@@ -121,7 +122,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			return new Pair<Pair<Word,String>,Pair<Word,String>>(matchingPair1,matchingPair2);
 		return null;
 	}
-	
+
 	public void onReceive(EndPoint src, PutMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
@@ -135,102 +136,116 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			//System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
 		}
 	}
-	
+
 	public void onReceive(EndPoint src, TravelMessage m) {
 
 		this.travel(m.getReturnPath(), m.getPattern1(), m.getPattern2(), 
 				m.getFingerNumber(), m.getDestination(), m.getLevel());
 
 	}
-	
+
 	public void onReceive(EndPoint src, CircularMessage m) {
 
 		if (m.getDestination().equals(endpoint))
-			udpSend(m.getReturnPath(),new ReplyMessage(null,null,null,m.getHopCount()));
+			udpSend(m.getReturnPath(),new ReplyMessage(m.getPattern1(),m.getPattern2(),m.getMatchingResults(),m.getHopCount()));
 		else {
 			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
 				patternizer(m.getPattern1(),m.getPattern2());
-			
+
 			Pair<Word,Word> matchingWords = null;
 			if (matchingResults != null)
 				matchingWords = new Pair<Word,Word>(
 						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
-			
+
 			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,matchingWords));
 			setColor(m.getColor());
 		}
 	}
-	
+
 	public void onReceive(EndPoint src, ReplyMessage m) {
 
-		System.out.println("Node "+endpoint.address.pos+" received a reply from "+
-				src.address.pos+" with a knowledge of "+m.getNodes()+" nodes");
+		//System.out.println("Node "+endpoint.address.pos+" received a reply from "+
+		//src.address.pos+" with a knowledge of "+m.getNodes()+" nodes");
 		Pair<String,String> queryKey = 
 			new Pair<String,String>(m.getPattern1(),m.getPattern2());
-		
-		Map<EndPoint,Pair<Word,Word>> receivedPatterns = 
+
+		Map<EndPoint,Pair<Word,Word>> queryResults = 
 			queryBuffers.get(queryKey);
-		receivedPatterns.putAll(m.getMatchingResults());
-		
+		queryResults.putAll(m.getMatchingResults());
+
 		queryTimers.put(queryKey,queryTimers.get(queryKey)+1);
 		if (queryTimers.get(queryKey) == Math.pow(2,PARTITION_LEVELS)) {
-			
-			
-			
+
+			if (queryResults.size() > 0) {
+				System.out.println("Node "+endpoint.address.pos+" found the following matches for this pattern ( "+
+						m.getPattern1()+" | "+m.getPattern2()+" )");
+				int i = 1;
+				for (EndPoint p : queryResults.keySet()) {
+					System.out.println("Answer #"+i+": ( "+
+							queryResults.get(p).getFirst().value+" | "+queryResults.get(p).getSecond().value+ " ) @ node "+p.address.pos);
+					i++;
+				}
+			} else {
+				System.out.println("Node "+endpoint.address.pos+" found no matches for this pattern ( "+
+						m.getPattern1()+" | "+m.getPattern2()+" )");
+			}
+
+			System.out.println();
+
 		}
 	}
-	
+
 //	public void onReceive(EndPoint src, GetMessage m) {
-//
-//		EndPoint nextHop = rtable.nextHop( m.getDst() );
-//		if (nextHop != null && nextHop != this.endpoint)
-//			this.udpSend(nextHop, new GetMessage(m));
-//		else {
-//			if (wordDictionary.containsKey(m.getWord().dHashValue()))
-//				udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
-//			else
-//				udpSend(m.getSender(),new GetReply(m.getWord(),null));
-//		}
+
+//	EndPoint nextHop = rtable.nextHop( m.getDst() );
+//	if (nextHop != null && nextHop != this.endpoint)
+//	this.udpSend(nextHop, new GetMessage(m));
+//	else {
+//	if (wordDictionary.containsKey(m.getWord().dHashValue()))
+//	udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
+//	else
+//	udpSend(m.getSender(),new GetReply(m.getWord(),null));
 //	}
-//	
+//	}
+
 //	public void onReceive(EndPoint src, GetReply m) {
-//
-//		if(m.getNodes() != null) {
-//			System.out.println("Word \""+m.getWord().value+"\" is at Nodes :");
-//			Iterator<EndPoint> i = m.getNodes().iterator();
-//			while(i.hasNext())
-//				System.out.println(i.next().address.pos);
-//		}
-//		else
-//			System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
+
+//	if(m.getNodes() != null) {
+//	System.out.println("Word \""+m.getWord().value+"\" is at Nodes :");
+//	Iterator<EndPoint> i = m.getNodes().iterator();
+//	while(i.hasNext())
+//	System.out.println(i.next().address.pos);
 //	}
-//	
+//	else
+//	System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
+//	}
+
 //	public void onReceive(EndPoint src, CircularGetMessage m) {
-//
-//		
-//		if (m.getSender().equals(endpoint))
-//			if(m.getMatchingResults().size() > 0) {
-//				System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
-//				Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
-//				while(i.hasNext())
-//					System.out.println(i.next().address.pos);
-//			}
-//			else
-//				System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
-//		else {
-//			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
-//				patternizer(m.getPattern1(),m.getPattern2());
-//			
-//			Pair<Word,Word> matchingWords = null;
-//			if (matchingResults != null)
-//				matchingWords = new Pair<Word,Word>(
-//						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
-//
-//			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
-//
-//		}
+
+
+//	if (m.getSender().equals(endpoint))
+//	if(m.getMatchingResults().size() > 0) {
+//	System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
+//	Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
+//	while(i.hasNext())
+//	System.out.println(i.next().address.pos);
 //	}
-	
+//	else
+//	System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
+//	else {
+//	Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
+//	patternizer(m.getPattern1(),m.getPattern2());
+
+//	Pair<Word,Word> matchingWords = null;
+//	if (matchingResults != null)
+//	matchingWords = new Pair<Word,Word>(
+//	matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
+
+//	udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
+
+//	}
+//	}
+
 
 	/* Implements the Chord Routing Table */
 	class ChordRoutingTable implements Displayable {
