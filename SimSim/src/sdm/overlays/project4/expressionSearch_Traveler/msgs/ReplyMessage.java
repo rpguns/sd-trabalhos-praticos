@@ -2,8 +2,10 @@ package sdm.overlays.project4.expressionSearch_Traveler.msgs;
 
 import java.awt.* ;
 import java.util.HashSet;
+import java.util.Map;
 
 import sdm.overlays.project4.expressionSearch.*;
+import sdm.overlays.project4.expressionSearch_Traveler.Pair;
 import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
@@ -13,28 +15,27 @@ import static simsim.core.Simulation.* ;
 
 public class ReplyMessage extends Message {
 	
-	protected Word word;
-	protected HashSet<EndPoint> nodes;
+	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
+	protected String pattern1,pattern2;
 	protected int hopCount = 1;
 	
-	public ReplyMessage( Word word, HashSet<EndPoint> nodes ) {
+	public ReplyMessage( String pattern1, String pattern2, Map<EndPoint,Pair<Word,Word>> matchingResults ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.word = word;
-		this.nodes = nodes;
+		this.matchingResults = matchingResults;
+		this.pattern1 = pattern1;
+		this.pattern2 = pattern2;
 	}
 	
-	public ReplyMessage( ReplyMessage other ) {
-		this( other.getWord(), other.getNodes() ) ;
-		this.color = other.color ;
-		this.hopCount = other.hopCount + 1 ;
+	public String getPattern1() {
+		return pattern1;
 	}
 	
-	public Word getWord() {
-		return word;
+	public String getPattern2() {
+		return pattern2;
 	}
 	
-	public HashSet<EndPoint> getNodes() {
-		return nodes;
+	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
+		return matchingResults;
 	}
 	
 	/* (non-Javadoc)
