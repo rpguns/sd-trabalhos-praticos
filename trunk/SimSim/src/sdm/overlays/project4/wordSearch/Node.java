@@ -16,6 +16,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public Set<Word> words;
 	public Map<Double,EndPoint> wordDictionary;
 
+	
 	public XY pos;
 	public Line shape;
 
