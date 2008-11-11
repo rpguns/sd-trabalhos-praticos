@@ -15,6 +15,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public double chordKey;
 	public Set<Word> words;
 	public Map<Double,EndPoint> wordDictionary;
+	public int messagesSent;
+	public int answeredQueries;
 
 	public XY pos;
 	public Line shape;
@@ -27,7 +29,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		chordKey = (double) key / (1L << NodeDB.MAX_KEY_LENGTH);
 		rtable = new ChordRoutingTable(this);
 		wordDictionary = new HashMap<Double,EndPoint>(100);
-
+		messagesSent = 0;
+		
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
 		pos = new XY(500 + R * Math.cos(a), 500 + R * Math.sin(a));
@@ -73,8 +76,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, PutMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint)
+		if (nextHop != null && nextHop != this.endpoint) {
 			this.udpSend(nextHop, new PutMessage(m));
+			messagesSent++;
+		}
 		else {
 			wordDictionary.put(m.getWord().dHashValue(), m.getOrigin());
 			//System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
@@ -84,18 +89,24 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, GetMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint)
+		if (nextHop != null && nextHop != this.endpoint) {
 			this.udpSend(nextHop, new GetMessage(m));
+			messagesSent++;
+		}
 		else {
-			if (wordDictionary.containsKey(m.getWord().dHashValue()))
+			if (wordDictionary.containsKey(m.getWord().dHashValue())) {
 				udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
-			else
+				messagesSent++;
+			}
+			else {
 				udpSend(m.getSender(),new GetReply(m.getWord(),null));
+				messagesSent++;
+			}
 		}
 	}
 	
 	public void onReceive(EndPoint src, GetReply m) {
-
+		answeredQueries++;
 		if(m.getNode() != null)
 			System.out.println("Word \""+m.getWord().value+"\" is at Node "+m.getNode().address.pos);
 		else
