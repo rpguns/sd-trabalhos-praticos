@@ -3,7 +3,7 @@ package sdm.overlays.project4.expressionSearch;
 import java.awt.*;
 import java.util.*;
 
-import sdm.overlays.project4.wordSearchMultiple.msgs.*;
+import sdm.overlays.project4.expressionSearch.msgs.*;
 import sdm.overlays.words.*;
 import simsim.core.*;
 import simsim.utils.*;
