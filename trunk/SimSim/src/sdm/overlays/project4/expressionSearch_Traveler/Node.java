@@ -21,6 +21,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public Map<Double,HashSet<EndPoint>> wordDictionary;
 	public Map< Pair<String,String>, Map<EndPoint,Pair<Word,Word>> > queryBuffers;
 	public Map< Pair<String,String>, Integer> queryTimers;
+	public int sentMessages;
+	public int answeredQueries;
 
 	public XY pos;
 	public Line shape;
@@ -68,6 +70,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,PARTITION_LEVELS-1);
 		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,PARTITION_LEVELS-1));
+		sentMessages++;
 	}
 
 	public void travel( EndPoint returnPath, String p1, String p2, int nFinger, EndPoint destination, int currentLevel) {
@@ -86,6 +89,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			//Recursividade distribuida
 			udpSend(rtable.fingers[nFinger+1].endpoint, 
 					new TravelMessage(returnPath,p1,p2,nFinger+1,destination,currentLevel-1));
+			sentMessages++;
 		}
 
 	}
@@ -126,8 +130,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, PutMessage m) {
 
 		EndPoint nextHop = rtable.nextHop( m.getDst() );
-		if (nextHop != null && nextHop != this.endpoint)
+		if (nextHop != null && nextHop != this.endpoint) {
 			this.udpSend(nextHop, new PutMessage(m));
+			sentMessages++;
+		}
 		else {
 			HashSet<EndPoint> previous = wordDictionary.get(m.getWord().dHashValue());
 			if (previous == null) previous = new HashSet<EndPoint>();
@@ -146,8 +152,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void onReceive(EndPoint src, CircularMessage m) {
 
-		if (m.getDestination().equals(endpoint))
+		if (m.getDestination().equals(endpoint)) {
 			udpSend(m.getReturnPath(),new ReplyMessage(m.getPattern1(),m.getPattern2(),m.getMatchingResults(),m.getHopCount()));
+			sentMessages++;
+		}
 		else {
 			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
 				patternizer(m.getPattern1(),m.getPattern2());
@@ -158,6 +166,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
 
 			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,matchingWords));
+			sentMessages++;
 			setColor(m.getColor());
 		}
 	}
@@ -175,7 +184,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 		queryTimers.put(queryKey,queryTimers.get(queryKey)+1);
 		if (queryTimers.get(queryKey) == Math.pow(2,PARTITION_LEVELS)) {
-
+			answeredQueries++;
 			if (queryResults.size() > 0) {
 				System.out.println("Node "+endpoint.address.pos+" found the following matches for this pattern ( "+
 						m.getPattern1()+" | "+m.getPattern2()+" )");
