@@ -15,7 +15,7 @@ public class HereIsYourSuccessor extends Message {
 	protected double key;
 	
 	public HereIsYourSuccessor( double key, EndPoint succ ) {
-		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 		this.succ = succ;
 	}
 	

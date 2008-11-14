@@ -44,7 +44,6 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
 		pos = new XY(500 + R * Math.cos(a), 500 + R * Math.sin(a));
 		shape = new Circle(pos.x, pos.y, 10);
-
 	}
 
 
@@ -101,6 +100,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		if (colorate)
 			gs.setColor(Color.RED);
 		gs.draw(shape);
+		gs.fill(shape);
 	}
 
 	public void pingPred() {
@@ -152,7 +152,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, LookupMessage m) {
 		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
-			this.udpSend(nextHop, new GiefSuccessor(m));
+			this.udpSend(nextHop, new LookupMessage(m));
 		} else {
 			this.udpSend(m.getSource(),new LookupReply(chordKey, endpoint, m.getFingerNumber()));
 		}
@@ -290,18 +290,22 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			gs.setColor( Color.DARK_GRAY ) ;
 			gs.setStroke( new BasicStroke(2.0f)) ;
 			for( RTableEntry i : fingers ) {
+				if (i != null) {
 				final XY radius = new XY(10,10) ;
 				Node other = (Node) i.endpoint.handler ;
 				gs.fill( new Ellipse( other.pos, radius ) ) ;
+				}
 			}
 			double j = 0.75 ;
 			for( RTableEntry i : fingers ) {
+				if (i!=null) {
 				j *= 1.5 ;
 				Node other = (Node) i.endpoint.handler ;				
 				XY m = pos.add(other.pos).mult(0.5) ;
 				XY c = new XY( m.x + (500 - m.x) / j, m.y + (500-m.y) / j ) ;
 				gs.draw( new QuadCurve( pos.x, pos.y, c.x, c.y, other.pos.x, other.pos.y) ) ;
-			}
+				}
+				}
 		}
 	}
 	

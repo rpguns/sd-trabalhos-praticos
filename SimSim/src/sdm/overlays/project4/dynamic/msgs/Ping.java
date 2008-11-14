@@ -14,7 +14,7 @@ public class Ping extends Message {
 
 	
 	public Ping() {
-		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 	}
 	
 	

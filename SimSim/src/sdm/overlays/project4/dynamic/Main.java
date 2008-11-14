@@ -11,11 +11,11 @@ import simsim.utils.*;
 import simsim.gui.geom.*;
 import sdm.overlays.words.*;
 
-
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
 	public static final int TOTAL_NODES = 20 ;
+	
 	public static Random generator = new Random();
 	public static final int NUM_OF_QUERIES = 500 ;
 	int sentQueries = 0;
