@@ -15,7 +15,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 3000 ;
+	public static final int TOTAL_NODES = 100 ;
 	public static Random generator = new Random();
 	public static final int NUM_OF_QUERIES = 500 ;
 	int sentQueries = 0;
@@ -38,7 +38,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(10) ;
+		super.setSimulationMaxTimeWarp(0.1) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
@@ -66,29 +66,28 @@ public class Main extends Simulation implements Displayable {
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
 
-		new PeriodicTask(1.0) {
+//		new Task(0) {
+//			public void run() {
+//				NodeDB.randomNode().crash();
+//				reSchedule(0.5 + 0.5 * rg.nextDouble()) ; //schedules a new execution of this task...
+//			}
+//		};
+		
+	    // From time to time, create a new node. If the rate of births and deaths is the same,
+		// the size of the system should stay constant on average.
+		new Task(1) {
 			public void run() {
-
-				//if (delay % 7 == 0) {
-				if (sentQueries < NUM_OF_QUERIES) {
-					
-				}
-				delay++;
+				System.out.println("A new node was born.");
+				new Node().init() ;
+				reSchedule(3.0 + 1.0 * rg.nextDouble()) ; //schedules a new execution of this task...
 			}
 		};
 
 		new PeriodicTask(10.0) {
 			public void run() {
-				int i = 0;
-				int j = 0;
-				for( Node n : NodeDB.nodes() ) {
-					i += n.answeredQueries;
-					j += n.sentMessages;
-				}
-				System.err.println("Sent "+sentQueries+" received "+i);
-				chart1.getSeries("s0").add( Simulation.currentTime(),  (i*100/sentQueries)) ;
-				chart2.getSeries("s0").add( Simulation.currentTime(),  j) ;
-				
+		
+				//TODO
+	
 			}
 		};
 		

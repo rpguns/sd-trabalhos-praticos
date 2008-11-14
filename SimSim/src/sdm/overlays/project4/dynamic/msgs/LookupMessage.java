@@ -4,12 +4,20 @@ import simsim.core.*;
 
 public class LookupMessage extends GiefSuccessor {
 	
-	public LookupMessage( EndPoint src, double key ) {
+	protected int fingerNumber;
+	
+	public LookupMessage( EndPoint src, double key, int nFinger ) {
 		super(src,key);
+		this.fingerNumber = nFinger;
 	}
 	
-	public LookupMessage( GiefSuccessor other ) {
+	public LookupMessage( LookupMessage other ) {
 		super(other);
+		this.fingerNumber = other.getFingerNumber();
+	}
+	
+	public int getFingerNumber() {
+		return fingerNumber;
 	}
 	
 }

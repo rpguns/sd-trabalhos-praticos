@@ -2,7 +2,7 @@ package sdm.overlays.project4.dynamic.msgs;
 
 import java.awt.* ;
 
-import sdm.overlays.structured.chord.*;
+import sdm.overlays.project4.dynamic.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;

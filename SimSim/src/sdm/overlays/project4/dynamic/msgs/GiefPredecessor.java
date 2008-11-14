@@ -9,30 +9,12 @@ import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class GiefSuccessor extends Message {
+public class GiefPredecessor extends Message {
 	
-	protected double key ;
-	protected EndPoint src;
 	private int hopCount = 1 ;
 	
-	public GiefSuccessor( EndPoint src, double key ) {
+	public GiefPredecessor(  ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.key = key ;
-		this.src = src;
-	}
-	
-	public GiefSuccessor( GiefSuccessor other ) {
-		this( other.getSource(), other.getKey() ) ;
-		this.color = other.color ;
-		this.hopCount = other.hopCount + 1 ;
-	}
-	
-	public EndPoint getSource() {
-		return src;
-	}
-	
-	public double getKey() {
-		return key;
 	}
 	
 	/* (non-Javadoc)

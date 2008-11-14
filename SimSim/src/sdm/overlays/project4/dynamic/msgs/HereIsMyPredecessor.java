@@ -9,29 +9,21 @@ import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class GiefSuccessor extends Message {
+public class HereIsMyPredecessor extends Message {
 	
-	protected double key ;
-	protected EndPoint src;
-	private int hopCount = 1 ;
+	protected EndPoint pred;
+	protected double key;
 	
-	public GiefSuccessor( EndPoint src, double key ) {
+	public HereIsMyPredecessor( double key, EndPoint pred ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.key = key ;
-		this.src = src;
+		this.pred = pred;
 	}
 	
-	public GiefSuccessor( GiefSuccessor other ) {
-		this( other.getSource(), other.getKey() ) ;
-		this.color = other.color ;
-		this.hopCount = other.hopCount + 1 ;
+	public EndPoint getPredecessor() {
+		return pred;
 	}
 	
-	public EndPoint getSource() {
-		return src;
-	}
-	
-	public double getKey() {
+	public double getPredKey() {
 		return key;
 	}
 	
@@ -49,7 +41,7 @@ public class GiefSuccessor extends Message {
 		Node b = (Node) dst.handler ;
 
 		XY m = a.pos.add( b.pos).mult( 0.5) ;    	
-		XY c = new XY( m.x + (500-m.x) / hopCount, m.y + (500 - m.y) / hopCount) ;
+		XY c = new XY( m.x + (500-m.x) / 1, m.y + (500 - m.y) / 1) ;
 
     	gs.setColor( color ) ;
     	
