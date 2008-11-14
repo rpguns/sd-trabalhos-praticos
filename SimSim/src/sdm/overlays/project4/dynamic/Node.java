@@ -24,9 +24,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public int sentMessages;
 	public int answeredQueries;
 	int currentFinger = 0;
+	boolean colorate = false;
 
 	public XY pos;
-	public Line shape;
+	public Circle shape;
 
 	ChordRoutingTable rtable;
 
@@ -42,7 +43,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		final double R = 450.0;
 		double a = chordKey * 2 * Math.PI - Math.PI / 2;
 		pos = new XY(500 + R * Math.cos(a), 500 + R * Math.sin(a));
-		shape = new Line(pos.x, pos.y, pos.x + 1, pos.y);
+		shape = new Circle(pos.x, pos.y, 10);
+
 	}
 
 
@@ -80,21 +82,30 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //	}
 
 	public void join(EndPoint firstBlood) {
+			colorate = true;
 			rtable.setPredecessor(null,0);
 			udpSend(firstBlood,new GiefSuccessor(endpoint,this.chordKey));
-			initNewNode();
 		}
+	
+	public void fingerize() {
+		for (int i = 0; i < NodeDB.MAX_KEY_LENGTH ; i++ )
+			udpSend(rtable.getSuccessor().endpoint, new LookupMessage(endpoint,i,currentFinger));
+	}
 
 	public void stabilize() {
-		udpSend(rtable.getSuccessor().endpoint,new GiefPredecessor());
+		if (rtable.getSuccessor() != null)
+			udpSend(rtable.getSuccessor().endpoint,new GiefPredecessor());
 	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {
+		if (colorate)
+			gs.setColor(Color.RED);
 		gs.draw(shape);
 	}
 
 	public void pingPred() {
-		udpSend(rtable.getPredecessor().endpoint,new Ping());
+		if (rtable.getPredecessor().endpoint != null)
+			udpSend(rtable.getPredecessor().endpoint,new Ping());
 	}
 
 	public String toString() {
@@ -138,6 +149,15 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			rtable.setPredecessor(m.getPredecessor(), m.getPredKey());
 	}
 	
+	public void onReceive(EndPoint src, LookupMessage m) {
+		EndPoint nextHop = rtable.nextHop( m.getKey() );
+		if (nextHop != null && nextHop != this.endpoint) {
+			this.udpSend(nextHop, new GiefSuccessor(m));
+		} else {
+			this.udpSend(m.getSource(),new LookupReply(chordKey, endpoint, m.getFingerNumber()));
+		}
+	}
+	
 	public void onReceive(EndPoint src, GiefSuccessor m) {
 		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
@@ -148,17 +168,12 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 	}
 	
-	public void onReceive(EndPoint src, LookupMessage m) {
-		EndPoint nextHop = rtable.nextHop( m.getKey() );
-		if (nextHop != null && nextHop != this.endpoint) {
-			this.udpSend(nextHop, new GiefSuccessor(m));
-		} else {
-			this.udpSend(m.getSource(),new LookupReply(chordKey, endpoint, m.getFingerNumber()));
-		}
-	}
+	
 	
 	public void onReceive(EndPoint src, HereIsYourSuccessor m) {
 		rtable.setSuccessor(m.getSuccessor(),m.getSuccKey());
+		initNewNode();
+		fingerize();
 	}
 	
 	public void onReceive(EndPoint src, LookupReply m) {
@@ -169,7 +184,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	class ChordRoutingTable implements Displayable {
 		int currentFinger = 0;
 		final double ownKey;
-		RTableEntry predecessor;
+		RTableEntry predecessor = new RTableEntry(0,null);
 		RTableEntry[] fingers = new RTableEntry[NodeDB.MAX_KEY_LENGTH];
 
 		ChordRoutingTable(Node owner) {
