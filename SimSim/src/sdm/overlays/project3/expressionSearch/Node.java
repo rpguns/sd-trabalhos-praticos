@@ -58,7 +58,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			public void run() {
 				RandomList<EndPoint> listToSend = new RandomList<EndPoint>();
 				listToSend.add(endpoint);
-				udpSend( contacts.randomElement(), new SeedExchange(listToSend));
+				udpSend( contacts.randomElement(), new ContactExchange(listToSend));
 				messagesSent++;
 			}
 		};
@@ -97,7 +97,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void query(String pattern1, String pattern2) {
 //		System.out.println("Querying...waiting for answer");
 		startedQuery = true;
-		super.setColor( Color.BLACK ) ;
+		//super.setColor( Color.BLACK ) ;
 		SearchQuery thisQuery = new SearchQuery(this.endpoint,pattern1,pattern2,computeID(this.endpoint,pattern1+pattern2),3);
 		myQueriesID.add(thisQuery.getID());
 		myQueryAnswers.put(new Pair<String,String>(pattern1,pattern2),new HashSet<EndPoint>());
@@ -113,7 +113,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 		gotQuery = true;
 		if (!queryCache.contains(msg.getID()) && !myQueriesID.contains(msg.getID())) {
-			super.setColor( Color.WHITE ) ;
+			//super.setColor( Color.WHITE ) ;
 //			if (queryCache.size() == MAX_SAVED_MSG)
 //				queryCache.removeLast();
 			queryCache.addFirst(msg.getID());
@@ -124,7 +124,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			if (matchingResults != null) {
 				toSendBuffer.add(new Pair<EndPoint,Message>(
 						msg.getOrigin(),new QueryReply(matchingResults.getFirst(),matchingResults.getSecond(),msg.getID()) ));
-				super.setColor( Color.BLUE );
+				//super.setColor( Color.BLUE );
 			}
 			//else
 				if (msg.getTTL() > 0)
@@ -151,7 +151,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 	}
 	
-	public void onReceive(EndPoint src, SeedExchange m) {
+	public void onReceive(EndPoint src, ContactExchange m) {
 		Set<EndPoint> x = new HashSet<EndPoint>(contacts);
 		x.add(src);
 		x.addAll(m.seeds);

@@ -61,7 +61,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			public void run() {
 				RandomList<EndPoint> listToSend = new RandomList<EndPoint>();
 				listToSend.add(endpoint);
-				udpSend( contacts.randomElement(), new SeedExchange(listToSend));
+				udpSend( contacts.randomElement(), new ContactExchange(listToSend));
 				messagesSent++;
 			}
 		};
@@ -74,7 +74,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	 */
 	
 	public int computeID(EndPoint origin, Word word) {
-		return new Random(origin.hashCode() + word.hashCode()).nextInt(1000000);
+		return Math.abs(new Random().nextInt(1000000)*(origin.hashCode() + word.hashCode()));
 	}
 
 	public void query(Word word, Integer expectedResult) {
@@ -127,7 +127,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 	}
 	
-	public void onReceive(EndPoint src, SeedExchange m) {
+	public void onReceive(EndPoint src, ContactExchange m) {
 		Set<EndPoint> x = new HashSet<EndPoint>(contacts);
 		x.add(src);
 		x.addAll(m.seeds);

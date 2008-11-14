@@ -1,45 +1,38 @@
 package sdm.overlays.project4.dynamic.msgs;
 
 import java.awt.* ;
-import java.util.Map;
 
-import sdm.overlays.project4.dynamic.*;
-import sdm.overlays.words.*;
+import sdm.overlays.structured.chord.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class ReplyMessage extends Message {
+public class GiefSuccessor extends Message {
 	
-	protected Map<EndPoint,Pair<Word,Word>> matchingResults;
-	protected int nNodes;
-	protected String pattern1,pattern2;
-	protected int hopCount = 1;
+	protected double key ;
+	protected EndPoint src;
+	private int hopCount = 1 ;
 	
-	public ReplyMessage( String pattern1, String pattern2, Map<EndPoint,Pair<Word,Word>> matchingResults, int nNodes ) {
+	public GiefSuccessor( EndPoint src, double key ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.matchingResults = matchingResults;
-		this.pattern1 = pattern1;
-		this.pattern2 = pattern2;
-		this.nNodes = nNodes;
+		this.key = key ;
+		this.src = src;
 	}
 	
-	public String getPattern1() {
-		return pattern1;
+	public GiefSuccessor( GiefSuccessor other ) {
+		this( other.getSource(), other.getKey() ) ;
+		this.color = other.color ;
+		this.hopCount = other.hopCount + 1 ;
 	}
 	
-	public String getPattern2() {
-		return pattern2;
+	public EndPoint getSource() {
+		return src;
 	}
 	
-	public Map<EndPoint,Pair<Word,Word>> getMatchingResults() {
-		return matchingResults;
-	}
-	
-	public int getNodes() {
-		return nNodes;
+	public double getKey() {
+		return key;
 	}
 	
 	/* (non-Javadoc)

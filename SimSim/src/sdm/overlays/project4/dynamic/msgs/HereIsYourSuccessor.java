@@ -2,44 +2,29 @@ package sdm.overlays.project4.dynamic.msgs;
 
 import java.awt.* ;
 
-import sdm.overlays.project4.dynamic.*;
-import sdm.overlays.words.*;
+import sdm.overlays.structured.chord.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
 import static simsim.core.Simulation.* ;
 
 
-public class PutMessage extends Message {
+public class HereIsYourSuccessor extends Message {
 	
-	protected Word word;
-	protected EndPoint origin;
-	protected double dst;
-	protected int hopCount = 1;
+	protected EndPoint succ;
+	protected double key;
 	
-	public PutMessage( Word word, EndPoint origin ) {
+	public HereIsYourSuccessor( double key, EndPoint succ ) {
 		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
-		this.word = word;
-		this.origin = origin;
-		this.dst = word.dHashValue();
+		this.succ = succ;
 	}
 	
-	public PutMessage( PutMessage other ) {
-		this( other.getWord(), other.getOrigin() ) ;
-		this.color = other.color ;
-		this.hopCount = other.hopCount + 1 ;
+	public EndPoint getSuccessor() {
+		return succ;
 	}
 	
-	public Word getWord() {
-		return word;
-	}
-	
-	public EndPoint getOrigin() {
-		return origin;
-	}
-	
-	public double getDst() {
-		return dst;
+	public double getSuccKey() {
+		return key;
 	}
 	
 	/* (non-Javadoc)
@@ -56,7 +41,7 @@ public class PutMessage extends Message {
 		Node b = (Node) dst.handler ;
 
 		XY m = a.pos.add( b.pos).mult( 0.5) ;    	
-		XY c = new XY( m.x + (500-m.x) / hopCount, m.y + (500 - m.y) / hopCount) ;
+		XY c = new XY( m.x + (500-m.x) / 1, m.y + (500 - m.y) / 1) ;
 
     	gs.setColor( color ) ;
     	

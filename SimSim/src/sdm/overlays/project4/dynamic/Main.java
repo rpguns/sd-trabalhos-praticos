@@ -66,28 +66,12 @@ public class Main extends Simulation implements Displayable {
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
 
-		//Test of Chord recursive routing to a known node...
-		/*new PeriodicTask(0.1) {
-			public void run() {
-				NodeDB.randomNode().routeTo( NodeDB.randomNode().chordKey ) ;
-			}
-		};*/
-
 		new PeriodicTask(1.0) {
 			public void run() {
 
 				//if (delay % 7 == 0) {
 				if (sentQueries < NUM_OF_QUERIES) {
-					sentQueries++;
-					String pattern1 = generateRegularExpression(WordsDB.randomWord());
-					String pattern2 = generateRegularExpression(WordsDB.randomWord());
-//					System.out.println("Expression 1: "+pattern1+"\tExpression 2: "+pattern2);
-
-
-					//System.out.println("Node: " + n.chordKey +
-					//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
-					NodeDB.randomNode().circularQuery(pattern1,pattern2);
-					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
+					
 				}
 				delay++;
 			}

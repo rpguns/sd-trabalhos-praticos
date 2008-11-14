@@ -12,7 +12,7 @@ import simsim.gui.geom.*;
 
 public class Node extends AbstractNode implements ExtendedMessageHandler, Displayable {
 
-	final static int PARTITION_LEVELS = 4;
+	final static int PARTITION_LEVELS = 3;
 
 	protected int test = 0;
 	public long key;
