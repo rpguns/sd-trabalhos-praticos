@@ -23,8 +23,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public Map< Pair<String,String>, Integer> queryTimers;
 	public int sentMessages;
 	public int answeredQueries;
-
-
+	int currentFinger = 0;
 
 	public XY pos;
 	public Line shape;
@@ -50,9 +49,30 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	// Populate the node's routing table.
 	public void init() {
 		rtable.populate(NodeDB.nodes());
+		initNewNode();
+	}
+	
+	public void initNewNode() {
 		words = new RandomList<Word>(WordsDB.randomWords(10));
-		//initWordDHT();
-		super.setColor(Color.green);
+	
+		new PeriodicTask(1.0) {
+			public void run() {
+				stabilize();
+			}
+		};
+		
+		new PeriodicTask(1.0) {
+			public void run() {
+				pingPred();
+			}
+		};
+		
+		new PeriodicTask(1.0) {
+			public void run() {
+				refreshFingers();
+			}
+		};
+		
 	}
 
 //	public void routeTo( double dst) {
@@ -60,23 +80,64 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //	}
 
 	public void join(EndPoint firstBlood) {
-			rtable.setPredecessor(null);
+			rtable.setPredecessor(null,0);
 			udpSend(firstBlood,new GiefSuccessor(endpoint,this.chordKey));
+			initNewNode();
 		}
 
+	public void stabilize() {
+		udpSend(rtable.getSuccessor().endpoint,new GiefPredecessor());
+	}
+	
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
 	}
 
+	public void pingPred() {
+		udpSend(rtable.getPredecessor().endpoint,new Ping());
+	}
 
 	public String toString() {
 		return Double.toString(chordKey);
 	}
+	
+	void refreshFingers() {
+		double fingerKey = rtable.exactFingerKey(currentFinger);
+		onReceive(endpoint, new LookupMessage(endpoint,fingerKey,currentFinger));
+		currentFinger++;
+		if (currentFinger == NodeDB.MAX_KEY_LENGTH)
+			currentFinger = 0;
+	}
+	
 
 	/*
 	 * MESSAGE HANDLERS
 	 */
 
+	public void onReceive(EndPoint src, GiefPredecessor m) {
+		udpSend(src,new HereIsMyPredecessor(rtable.getPredecessor().key,rtable.getPredecessor().endpoint));
+	}
+	
+	public void onReceive(EndPoint src, HereIsMyPredecessor m) {
+		if (m.getPredKey() > this.chordKey && m.getPredKey() < rtable.getSuccessor().key)
+			rtable.setSuccessor(m.getPredecessor(), m.getPredKey());
+		udpSend(rtable.getSuccessor().endpoint, new NotifyMessage(this.chordKey,this.endpoint));
+	}
+	
+	public void onReceive(EndPoint src, Ping m) {
+		//System.out.println("I'm here! Pong! lulz");
+	}
+	
+	public void onSendFailure(EndPoint src, Ping m) {
+		rtable.setPredecessor(null, 0);
+	}
+	
+	
+	public void onReceive(EndPoint src, NotifyMessage m) {
+		if (rtable.predecessor.endpoint == null || (m.getPredKey() > rtable.getPredecessor().key && m.getPredKey() < this.chordKey))
+			rtable.setPredecessor(m.getPredecessor(), m.getPredKey());
+	}
+	
 	public void onReceive(EndPoint src, GiefSuccessor m) {
 		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
@@ -87,15 +148,28 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 	}
 	
+	public void onReceive(EndPoint src, LookupMessage m) {
+		EndPoint nextHop = rtable.nextHop( m.getKey() );
+		if (nextHop != null && nextHop != this.endpoint) {
+			this.udpSend(nextHop, new GiefSuccessor(m));
+		} else {
+			this.udpSend(m.getSource(),new LookupReply(chordKey, endpoint, m.getFingerNumber()));
+		}
+	}
+	
 	public void onReceive(EndPoint src, HereIsYourSuccessor m) {
 		rtable.setSuccessor(m.getSuccessor(),m.getSuccKey());
+	}
+	
+	public void onReceive(EndPoint src, LookupReply m) {
+		rtable.setFinger(m.getFingerNumber(),m.getSuccessor(),m.getSuccKey());
 	}
 
 	/* Implements the Chord Routing Table */
 	class ChordRoutingTable implements Displayable {
 		int currentFinger = 0;
 		final double ownKey;
-		EndPoint sucessor,predecessor;
+		RTableEntry predecessor;
 		RTableEntry[] fingers = new RTableEntry[NodeDB.MAX_KEY_LENGTH];
 
 		ChordRoutingTable(Node owner) {
@@ -106,7 +180,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			return fingers[fingers.length-1];
 		}
 		
-		EndPoint getPredecessor() {
+		RTableEntry getPredecessor() {
 			return predecessor;
 		}
 		
@@ -114,8 +188,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			fingers[fingers.length-1] = new RTableEntry(nsucKey,nsuc);
 		}
 		
-		void setPredecessor(EndPoint npred) {
-			predecessor = npred;
+		void setPredecessor(EndPoint npred,double npredKey) {
+			predecessor = new RTableEntry(npredKey,npred);
 		}
 
 		void setFinger(int nFinger, EndPoint finger, double fingerKey) {

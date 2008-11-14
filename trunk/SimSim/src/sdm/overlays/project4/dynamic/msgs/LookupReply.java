@@ -4,8 +4,15 @@ import simsim.core.*;
 
 public class LookupReply extends HereIsYourSuccessor {
 	
-	public LookupReply( double key, EndPoint succ ) {
-		super( key,succ );	
+	protected int fingerNumber;
+	
+	public LookupReply( double key, EndPoint succ, int nFinger ) {
+		super( key,succ );
+		this.fingerNumber = nFinger;
+	}
+	
+	public int getFingerNumber() {
+		return fingerNumber;
 	}
 	
 }
