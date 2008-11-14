@@ -166,11 +166,11 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	public void display( Graphics2D gu, Graphics2D gs ) {
-		gs.setColor( Color.gray ) ;
+		/*gs.setColor( Color.gray ) ;
 		gs.setStroke( new BasicStroke(0.5f)) ;
 
 		for( Node i : NodeDB.nodes() ) 
-			i.display(gu, gs) ;
+			i.display(gu, gs) ;*/
 	}
 
 	public static void main( String[] args ) throws Exception {

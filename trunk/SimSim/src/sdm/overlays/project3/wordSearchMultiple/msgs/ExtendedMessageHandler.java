@@ -8,6 +8,6 @@ public interface ExtendedMessageHandler extends MessageHandler {
 	
 	public void onReceive(EndPoint src, QueryReply m);
 	
-	public void onReceive(EndPoint src, SeedExchange m);
+	public void onReceive(EndPoint src, ContactExchange m);
 	
 }

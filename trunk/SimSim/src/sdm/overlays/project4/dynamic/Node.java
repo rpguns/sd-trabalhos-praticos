@@ -24,6 +24,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public int sentMessages;
 	public int answeredQueries;
 
+
+
 	public XY pos;
 	public Line shape;
 
@@ -44,11 +46,6 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		shape = new Line(pos.x, pos.y, pos.x + 1, pos.y);
 	}
 
-	//Coloca os pares word/endpoint na DHT
-	public void initWordDHT() {
-		for (Word w : words) 
-			onReceive(endpoint, new PutMessage(w,endpoint));
-	}
 
 	// Populate the node's routing table.
 	public void init() {
@@ -62,37 +59,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //	onReceive(endpoint, new ChordMessage(dst));
 //	}
 
-	public void circularQuery(String p1, String p2) {
-		Pair<String,String> queryKey = new Pair<String,String>(p1,p2);
-		queryBuffers.put(queryKey,
-				new HashMap<EndPoint,Pair<Word,Word>>(10));
-		queryTimers.put(queryKey, 0);
-
-		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,PARTITION_LEVELS-1);
-		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,PARTITION_LEVELS-1));
-		sentMessages++;
-	}
-
-	public void travel( EndPoint returnPath, String p1, String p2, int nFinger, EndPoint destination, int currentLevel) {
-
-		//Caso base
-		if (currentLevel == 0) {
-
-			onReceive(endpoint, new CircularMessage(returnPath,p1,p2,destination));
-
-		} else {
-
-			//Recursividade local
-			this.travel(returnPath, p1, p2, nFinger+1, 
-					rtable.fingers[nFinger+1].endpoint, currentLevel-1);
-
-			//Recursividade distribuida
-			udpSend(rtable.fingers[nFinger+1].endpoint, 
-					new TravelMessage(returnPath,p1,p2,nFinger+1,destination,currentLevel-1));
-			sentMessages++;
+	public void join(EndPoint firstBlood) {
+			rtable.setPredecessor(null);
+			udpSend(firstBlood,new GiefSuccessor(endpoint,this.chordKey));
 		}
-
-	}
 
 	public void display(Graphics2D gu, Graphics2D gs) {
 		gs.draw(shape);
@@ -107,165 +77,51 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	 * MESSAGE HANDLERS
 	 */
 
-	public Pair<Word,String> matchExpression(String expression) {
-		Word matchedWord = null;
-		for (Word w : words) {
-			if (w.value.matches(expression))
-				matchedWord = w;
-		}
-		if (matchedWord != null)
-			return new Pair<Word,String>(matchedWord,expression);
-		return null;
-	}
-
-	public Pair<Pair<Word,String>,Pair<Word,String>> patternizer(String pat1, String pat2) {
-
-		Pair<Word,String> matchingPair1 = matchExpression(pat1);
-		Pair<Word,String> matchingPair2 = matchExpression(pat2);
-		if (matchingPair1 != null && matchingPair2 != null)
-			return new Pair<Pair<Word,String>,Pair<Word,String>>(matchingPair1,matchingPair2);
-		return null;
-	}
-
-	public void onReceive(EndPoint src, PutMessage m) {
-
-		EndPoint nextHop = rtable.nextHop( m.getDst() );
+	public void onReceive(EndPoint src, GiefSuccessor m) {
+		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
-			this.udpSend(nextHop, new PutMessage(m));
-			sentMessages++;
-		}
-		else {
-			HashSet<EndPoint> previous = wordDictionary.get(m.getWord().dHashValue());
-			if (previous == null) previous = new HashSet<EndPoint>();
-			previous.add(m.getOrigin());
-			wordDictionary.put(m.getWord().dHashValue(),previous);
-			//System.out.println("Saved word: "+m.getWord().value+" at nodeKey: "+this.chordKey+" with wordKey " + m.getWord().dHashValue());
+			this.udpSend(nextHop, new GiefSuccessor(m));
+		} else {
+			RTableEntry successor = rtable.getSuccessor();
+			this.udpSend(m.getSource(),new HereIsYourSuccessor(successor.key, successor.endpoint));
 		}
 	}
-
-	public void onReceive(EndPoint src, TravelMessage m) {
-
-		this.travel(m.getReturnPath(), m.getPattern1(), m.getPattern2(), 
-				m.getFingerNumber(), m.getDestination(), m.getLevel());
-
+	
+	public void onReceive(EndPoint src, HereIsYourSuccessor m) {
+		rtable.setSuccessor(m.getSuccessor(),m.getSuccKey());
 	}
-
-	public void onReceive(EndPoint src, CircularMessage m) {
-
-		if (m.getDestination().equals(endpoint)) {
-			udpSend(m.getReturnPath(),new ReplyMessage(m.getPattern1(),m.getPattern2(),m.getMatchingResults(),m.getHopCount()));
-			sentMessages++;
-		}
-		else {
-			Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
-				patternizer(m.getPattern1(),m.getPattern2());
-
-			Pair<Word,Word> matchingWords = null;
-			if (matchingResults != null)
-				matchingWords = new Pair<Word,Word>(
-						matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
-
-			udpSend(rtable.fingers[rtable.fingers.length-1].endpoint, new CircularMessage(m,endpoint,matchingWords));
-			sentMessages++;
-			setColor(m.getColor());
-		}
-	}
-
-	public void onReceive(EndPoint src, ReplyMessage m) {
-
-		//System.out.println("Node "+endpoint.address.pos+" received a reply from "+
-		//src.address.pos+" with a knowledge of "+m.getNodes()+" nodes");
-		Pair<String,String> queryKey = 
-			new Pair<String,String>(m.getPattern1(),m.getPattern2());
-
-		Map<EndPoint,Pair<Word,Word>> queryResults = 
-			queryBuffers.get(queryKey);
-		queryResults.putAll(m.getMatchingResults());
-
-		queryTimers.put(queryKey,queryTimers.get(queryKey)+1);
-		if (queryTimers.get(queryKey) == Math.pow(2,PARTITION_LEVELS)) {
-			answeredQueries++;
-			if (queryResults.size() > 0) {
-				System.out.println("Node "+endpoint.address.pos+" found the following matches for this pattern ( "+
-						m.getPattern1()+" | "+m.getPattern2()+" )");
-				int i = 1;
-				for (EndPoint p : queryResults.keySet()) {
-					System.out.println("Answer #"+i+": ( "+
-							queryResults.get(p).getFirst().value+" | "+queryResults.get(p).getSecond().value+ " ) @ node "+p.address.pos);
-					i++;
-				}
-			} else {
-				System.out.println("Node "+endpoint.address.pos+" found no matches for this pattern ( "+
-						m.getPattern1()+" | "+m.getPattern2()+" )");
-			}
-
-			System.out.println();
-
-		}
-	}
-
-//	public void onReceive(EndPoint src, GetMessage m) {
-
-//	EndPoint nextHop = rtable.nextHop( m.getDst() );
-//	if (nextHop != null && nextHop != this.endpoint)
-//	this.udpSend(nextHop, new GetMessage(m));
-//	else {
-//	if (wordDictionary.containsKey(m.getWord().dHashValue()))
-//	udpSend(m.getSender(),new GetReply(m.getWord(),wordDictionary.get(m.getWord().dHashValue())) );
-//	else
-//	udpSend(m.getSender(),new GetReply(m.getWord(),null));
-//	}
-//	}
-
-//	public void onReceive(EndPoint src, GetReply m) {
-
-//	if(m.getNodes() != null) {
-//	System.out.println("Word \""+m.getWord().value+"\" is at Nodes :");
-//	Iterator<EndPoint> i = m.getNodes().iterator();
-//	while(i.hasNext())
-//	System.out.println(i.next().address.pos);
-//	}
-//	else
-//	System.out.println("Word \""+m.getWord().value+"\" is not in the DHT");
-//	}
-
-//	public void onReceive(EndPoint src, CircularGetMessage m) {
-
-
-//	if (m.getSender().equals(endpoint))
-//	if(m.getMatchingResults().size() > 0) {
-//	System.out.println("Matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
-//	Iterator<EndPoint> i = m.getMatchingResults().keySet().iterator();
-//	while(i.hasNext())
-//	System.out.println(i.next().address.pos);
-//	}
-//	else
-//	System.out.println("No matching results for patterns: \""+m.getPattern1()+"\"|\""+m.getPattern2()+"\"");
-//	else {
-//	Pair<Pair<Word,String>,Pair<Word,String>> matchingResults = 
-//	patternizer(m.getPattern1(),m.getPattern2());
-
-//	Pair<Word,Word> matchingWords = null;
-//	if (matchingResults != null)
-//	matchingWords = new Pair<Word,Word>(
-//	matchingResults.getFirst().getFirst(),matchingResults.getSecond().getFirst());
-
-//	udpSend(rtable.fingers[rtable.fingers.length-1].endpoint,new CircularGetMessage(m,endpoint,matchingWords));
-
-//	}
-//	}
-
 
 	/* Implements the Chord Routing Table */
 	class ChordRoutingTable implements Displayable {
+		int currentFinger = 0;
 		final double ownKey;
-
-		final RTableEntry[] fingers = new RTableEntry[NodeDB.MAX_KEY_LENGTH];
+		EndPoint sucessor,predecessor;
+		RTableEntry[] fingers = new RTableEntry[NodeDB.MAX_KEY_LENGTH];
 
 		ChordRoutingTable(Node owner) {
 			this.ownKey = owner.chordKey;
 		}
+		
+		RTableEntry getSuccessor() {
+			return fingers[fingers.length-1];
+		}
+		
+		EndPoint getPredecessor() {
+			return predecessor;
+		}
+		
+		void setSuccessor(EndPoint nsuc,double nsucKey) {
+			fingers[fingers.length-1] = new RTableEntry(nsucKey,nsuc);
+		}
+		
+		void setPredecessor(EndPoint npred) {
+			predecessor = npred;
+		}
 
+		void setFinger(int nFinger, EndPoint finger, double fingerKey) {
+			fingers[nFinger] = new RTableEntry(fingerKey,finger);
+		}
+		
 		void populate(Collection<Node> nodes) {
 
 			TreeSet<Node> sn = new TreeSet<Node>( new ChordNodeSorter( exactFingerKey(0)));
@@ -310,7 +166,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			double k = ownKey + Math.pow(2, -(j + 1));
 			return k < 1 ? k : k - 1.0;
 		}
-
+		
 		double distanceBetween(double key, double candidate) {
 			double d = key - candidate;
 			return d >= 0 ? d : d + 1.0;
@@ -321,16 +177,6 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			for (RTableEntry i : fingers)
 				System.out.printf("%.8f\n", i.key);
 
-		}
-
-		class RTableEntry {
-			double key;
-			EndPoint endpoint;
-
-			RTableEntry(double k, EndPoint e) {
-				key = k;
-				endpoint = e;
-			}
 		}
 
 		class ChordNodeSorter implements Comparator<Node> {
@@ -369,4 +215,15 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			}
 		}
 	}
+	
+	class RTableEntry {
+		double key;
+		EndPoint endpoint;
+
+		RTableEntry(double k, EndPoint e) {
+			key = k;
+			endpoint = e;
+		}
+	}
+	
 }

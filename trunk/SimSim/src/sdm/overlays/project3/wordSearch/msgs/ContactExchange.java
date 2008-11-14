@@ -18,11 +18,11 @@ import simsim.core.*;
  * @author smd
  *
  */
-public class SeedExchange extends Message {
+public class ContactExchange extends Message {
 	
 	public ArrayList<EndPoint> seeds ;
 
-	public SeedExchange( Collection<EndPoint> x ) {
+	public ContactExchange( Collection<EndPoint> x ) {
 		super( false, Color.black ) ;
 		seeds = new ArrayList<EndPoint>( x ) ;
 	}

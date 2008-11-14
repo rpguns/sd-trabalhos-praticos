@@ -4,9 +4,7 @@ import simsim.core.*;
 
 public interface ExtendedMessageHandler extends MessageHandler {
 	
-	public void onReceive( EndPoint src, PutMessage m) ;
-	public void onReceive( EndPoint src, TravelMessage m);
-	public void onReceive( EndPoint src, CircularMessage m);
-	public void onReceive( EndPoint src, ReplyMessage m);
+	public void onReceive( EndPoint src, GiefSuccessor m);
+	public void onReceive( EndPoint src, HereIsYourSuccessor m);
 
 }

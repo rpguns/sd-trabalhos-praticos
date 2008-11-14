@@ -15,7 +15,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 3000 ;
+	public static final int TOTAL_NODES = 150 ;
 	public static Random generator = new Random();
 	public static final int NUM_OF_QUERIES = 500 ;
 	int sentQueries = 0;
@@ -38,7 +38,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(10) ;
+		super.setSimulationMaxTimeWarp(0.05) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
@@ -87,7 +87,7 @@ public class Main extends Simulation implements Displayable {
 					//System.out.println("Node: " + n.chordKey +
 					//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
 					NodeDB.randomNode().circularQuery(pattern1,pattern2);
-					reSchedule( 0.5 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
+					reSchedule( /*0.5 + (1.5 * rg.nextDouble() )*/ 2) ; //schedules a new execution of this task...
 				}
 				delay++;
 			}
