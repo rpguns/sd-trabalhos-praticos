@@ -15,7 +15,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 100 ;
+	public static final int TOTAL_NODES = 20 ;
 	public static Random generator = new Random();
 	public static final int NUM_OF_QUERIES = 500 ;
 	int sentQueries = 0;
@@ -59,7 +59,7 @@ public class Main extends Simulation implements Displayable {
 		
 		//Create the simulation nodes
 		for( int i = 0 ; i < TOTAL_NODES ; i++ ) 
-			new Node() ;
+			new Node();
 
 
 		//Initialize the simulation nodes
@@ -78,7 +78,8 @@ public class Main extends Simulation implements Displayable {
 		new Task(1) {
 			public void run() {
 				System.out.println("A new node was born.");
-				new Node().init() ;
+				Node contact = NodeDB.randomNode();
+				new Node().join(contact.endpoint);
 				reSchedule(3.0 + 1.0 * rg.nextDouble()) ; //schedules a new execution of this task...
 			}
 		};
