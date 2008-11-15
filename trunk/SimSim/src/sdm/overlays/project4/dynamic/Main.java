@@ -14,7 +14,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 10 ;
+	public static final int TOTAL_NODES = 8 ;
 	public Node starter;
 	
 	public static Random generator = new Random();

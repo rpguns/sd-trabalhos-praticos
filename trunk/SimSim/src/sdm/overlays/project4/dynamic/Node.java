@@ -55,19 +55,19 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void initNewNode() {
 		words = new RandomList<Word>(WordsDB.randomWords(10));
 
-		new PeriodicTask(0.2) {
+		new PeriodicTask(0.5) {
 			public void run() {
 				stabilize();
 			}
 		};
 
-		new PeriodicTask(0.2) {
+		new PeriodicTask(0.1) {
 			public void run() {
 				pingPred();
 			}
 		};
 
-		new PeriodicTask(0.2) {
+		new PeriodicTask(0.5) {
 			public void run() {
 				refreshFingers();
 			}
@@ -140,7 +140,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, HereIsMyPredecessor m) {
 		if (contains(this.chordKey,rtable.getSuccessor().key,m.getPredKey())) {
 			rtable.setSuccessor(m.getPredecessor(), m.getPredKey());
-			System.out.println("Successor updated considering:\n[ "+chordKey+" ; "+m.getPredKey()+" ; "+rtable.getSuccessor().key+" ]");
+			//System.out.println("Successor updated considering:\n[ "+chordKey+" ; "+m.getPredKey()+" ; "+rtable.getSuccessor().key+" ]");
 		}
 		udpSend(rtable.getSuccessor().endpoint, new NotifyMessage(this.chordKey,this.endpoint));
 	}
@@ -149,13 +149,14 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	}
 
 	public void onSendFailure(EndPoint src, Ping m) {
+		System.out.println("LULZ");
 		rtable.setPredecessor(null, -1);
 	}
 	
 	public void onReceive(EndPoint src, NotifyMessage m) {
 		if (rtable.getPredecessor().endpoint == null || contains(rtable.getPredecessor().key,chordKey,m.getPredKey())) {
 			rtable.setPredecessor(m.getPredecessor(), m.getPredKey());
-			System.out.println("Predecessor updated considering:\n[ "+rtable.getPredecessor().key+" ; "+m.getPredKey()+" ; "+chordKey+" ]");
+			//System.out.println("Predecessor updated considering:\n[ "+rtable.getPredecessor().key+" ; "+m.getPredKey()+" ; "+chordKey+" ]");
 		
 		}
 	}
@@ -172,10 +173,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, GiefSuccessor m) {
 		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
-			System.out.println("AYE? "+m.getKey()+" "+chordKey);
+			//System.out.println("AYE? "+m.getKey()+" "+chordKey);
 			this.udpSend(nextHop, new GiefSuccessor(m));
 		} else {
-			System.out.println("AYE! "+m.getKey()+" "+chordKey);
+			//System.out.println("AYE! "+m.getKey()+" "+chordKey);
 			
 			RTableEntry successor = rtable.getSuccessor();
 			System.out.println("AYE Result: "+successor.key);
@@ -190,10 +191,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, HereIsYourSuccessor m) {
 		rtable.setSuccessor(m.getSuccessor(),m.getSuccKey());
 		
-		System.out.println("Successor retrieved from: "+src.address.pos);
-		System.out.println("at Node: "+chordKey);
-		System.out.println("with position: "+m.getSuccKey());
-		System.out.println();
+//		System.out.println("Successor retrieved from: "+src.address.pos);
+//		System.out.println("at Node: "+chordKey);
+//		System.out.println("with position: "+m.getSuccKey());
+//		System.out.println();
 		//fingerize();
 		initNewNode();
 	}
