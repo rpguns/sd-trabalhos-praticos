@@ -18,7 +18,7 @@ public class LookupMessage extends Message {
 	private int hopCount = 1 ;
 	
 	public LookupMessage( EndPoint src, double key , int nFinger) {
-		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.BLUE );
 		this.key = key ;
 		this.src = src;
 		this.fingerNumber = nFinger;

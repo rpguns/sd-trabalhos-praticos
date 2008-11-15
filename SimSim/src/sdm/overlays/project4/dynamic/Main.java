@@ -14,7 +14,8 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 20 ;
+	public static final int TOTAL_NODES = 200 ;
+	public Node starter;
 	
 	public static Random generator = new Random();
 	public static final int NUM_OF_QUERIES = 500 ;
@@ -38,7 +39,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(0.1) ;
+		super.setSimulationMaxTimeWarp(0.2) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
@@ -66,6 +67,11 @@ public class Main extends Simulation implements Displayable {
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
 
+//		//Create a starting Node
+//		Node ns = new Node();
+//		ns.rtable.setSuccessor(ns.endpoint, ns.chordKey);
+//		starter = ns;
+		
 //		new Task(0) {
 //			public void run() {
 //				NodeDB.randomNode().crash();
@@ -75,19 +81,19 @@ public class Main extends Simulation implements Displayable {
 		
 	    // From time to time, create a new node. If the rate of births and deaths is the same,
 		// the size of the system should stay constant on average.
-		new Task(1) {
+		new Task(1.0) {
 			public void run() {
 				System.out.println("A new node was born.");
 				Node contact = NodeDB.randomNode();
 				new Node().join(contact.endpoint);
-				reSchedule(3.0 + 1.0 * rg.nextDouble()) ; //schedules a new execution of this task...
+				reSchedule(5.0 + 0.5 * rg.nextDouble()) ; //schedules a new execution of this task...
 			}
 		};
 
-		new PeriodicTask(10.0) {
+		new PeriodicTask(0.05) {
 			public void run() {
 		
-				//TODO
+				//System.out.println("Starter: "+starter.endpoint.address.pos+" Pred: "+(starter.rtable.getPredecessor().endpoint==null?"null":starter.rtable.getPredecessor().endpoint.address.pos)+" Succ: "+starter.rtable.getSuccessor().endpoint.address.pos);
 	
 			}
 		};

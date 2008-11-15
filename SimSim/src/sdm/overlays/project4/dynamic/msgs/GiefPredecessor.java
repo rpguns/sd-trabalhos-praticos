@@ -14,7 +14,7 @@ public class GiefPredecessor extends Message {
 	private int hopCount = 1 ;
 	
 	public GiefPredecessor(  ) {
-		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.BLUE );
 	}
 	
 	/* (non-Javadoc)

@@ -15,7 +15,7 @@ public class NotifyMessage extends Message {
 	protected double key;
 	
 	public NotifyMessage( double key, EndPoint pred ) {
-		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.BLACK );
 		this.pred = pred;
 	}
 	
