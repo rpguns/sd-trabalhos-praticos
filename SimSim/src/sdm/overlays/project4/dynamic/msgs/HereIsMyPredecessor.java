@@ -17,6 +17,7 @@ public class HereIsMyPredecessor extends Message {
 	public HereIsMyPredecessor( double key, EndPoint pred ) {
 		super(false, Color.BLUE );
 		this.pred = pred;
+		this.key = key;
 	}
 	
 	public EndPoint getPredecessor() {

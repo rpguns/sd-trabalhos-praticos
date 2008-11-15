@@ -17,6 +17,7 @@ public class NotifyMessage extends Message {
 	public NotifyMessage( double key, EndPoint pred ) {
 		super(false, Color.BLACK );
 		this.pred = pred;
+		this.key = key;
 	}
 	
 	public EndPoint getPredecessor() {
