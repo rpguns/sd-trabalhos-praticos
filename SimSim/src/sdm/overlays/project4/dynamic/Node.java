@@ -3,7 +3,6 @@ package sdm.overlays.project4.dynamic;
 import java.awt.*;
 import java.util.*;
 
-
 import sdm.overlays.project4.dynamic.msgs.*;
 import sdm.overlays.words.*;
 import simsim.core.*;
@@ -184,7 +183,9 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		}
 	}
 
-
+	public void crash() {
+		NodeDB.dispose(this) ;
+	}
 
 	public void onReceive(EndPoint src, HereIsYourSuccessor m) {
 		rtable.setSuccessor(m.getSuccessor(),m.getSuccKey());
