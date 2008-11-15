@@ -16,7 +16,7 @@ public class LookupReply extends Message {
 	protected int fingerNumber;
 	
 	public LookupReply( double key, EndPoint succ, int nFinger ) {
-		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.BLUE );
 		this.succ = succ;
 		this.fingerNumber = nFinger;
 	}

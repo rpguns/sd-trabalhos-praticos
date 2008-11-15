@@ -15,7 +15,7 @@ public class HereIsMyPredecessor extends Message {
 	protected double key;
 	
 	public HereIsMyPredecessor( double key, EndPoint pred ) {
-		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.BLUE );
 		this.pred = pred;
 	}
 	

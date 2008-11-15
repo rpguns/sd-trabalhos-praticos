@@ -52,28 +52,28 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		rtable.populate(NodeDB.nodes());
 		initNewNode();
 	}
-	
+
 	public void initNewNode() {
 		words = new RandomList<Word>(WordsDB.randomWords(10));
-	
-		new PeriodicTask(1.0) {
+/*
+		new PeriodicTask(0.2) {
 			public void run() {
 				stabilize();
 			}
 		};
-		
-		new PeriodicTask(1.0) {
+
+		new PeriodicTask(0.2) {
 			public void run() {
 				pingPred();
 			}
 		};
-		
-		new PeriodicTask(1.0) {
+
+		new PeriodicTask(0.2) {
 			public void run() {
 				refreshFingers();
 			}
-		};
-		
+		};*/
+
 	}
 
 //	public void routeTo( double dst) {
@@ -81,21 +81,22 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 //	}
 
 	public void join(EndPoint firstBlood) {
-			colorate = true;
-			rtable.setPredecessor(null,0);
-			udpSend(firstBlood,new GiefSuccessor(endpoint,this.chordKey));
-		}
-	
+		colorate = true;
+		rtable.setPredecessor(null,-1);
+		udpSend(firstBlood,new GiefSuccessor(endpoint,this.chordKey));
+		System.out.println("YAY?");
+		//initNewNode();
+	}
+
 	public void fingerize() {
 		for (int i = 0; i < NodeDB.MAX_KEY_LENGTH ; i++ )
 			udpSend(rtable.getSuccessor().endpoint, new LookupMessage(endpoint,i,currentFinger));
 	}
 
 	public void stabilize() {
-		if (rtable.getSuccessor() != null)
 			udpSend(rtable.getSuccessor().endpoint,new GiefPredecessor());
 	}
-	
+
 	public void display(Graphics2D gu, Graphics2D gs) {
 		if (colorate)
 			gs.setColor(Color.RED);
@@ -104,14 +105,13 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	}
 
 	public void pingPred() {
-		if (rtable.getPredecessor().endpoint != null)
-			udpSend(rtable.getPredecessor().endpoint,new Ping());
+		udpSend(rtable.getPredecessor().endpoint,new Ping());
 	}
 
 	public String toString() {
 		return Double.toString(chordKey);
 	}
-	
+
 	void refreshFingers() {
 		double fingerKey = rtable.exactFingerKey(currentFinger);
 		onReceive(endpoint, new LookupMessage(endpoint,fingerKey,currentFinger));
@@ -119,7 +119,16 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		if (currentFinger == NodeDB.MAX_KEY_LENGTH)
 			currentFinger = 0;
 	}
-	
+
+	public boolean contains(double a, double b, double x) {
+		if (b - a > 0)
+			return x > a && x < b;
+		else 
+			if (b-a > 0)
+				return contains(a,1,x) || contains(0,b,x);
+		return false;
+	}
+
 
 	/*
 	 * MESSAGE HANDLERS
@@ -128,27 +137,29 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, GiefPredecessor m) {
 		udpSend(src,new HereIsMyPredecessor(rtable.getPredecessor().key,rtable.getPredecessor().endpoint));
 	}
-	
+
 	public void onReceive(EndPoint src, HereIsMyPredecessor m) {
-		if (m.getPredKey() > this.chordKey && m.getPredKey() < rtable.getSuccessor().key)
+		if (contains(this.chordKey,rtable.getSuccessor().key,m.getPredKey())) {
 			rtable.setSuccessor(m.getPredecessor(), m.getPredKey());
+			System.out.println("Successor updated considering:\n[ "+chordKey+" ; "+m.getPredKey()+" ; "+rtable.getSuccessor().key+" ]");
+		}
 		udpSend(rtable.getSuccessor().endpoint, new NotifyMessage(this.chordKey,this.endpoint));
 	}
-	
+
 	public void onReceive(EndPoint src, Ping m) {
-		//System.out.println("I'm here! Pong! lulz");
 	}
-	
+
 	public void onSendFailure(EndPoint src, Ping m) {
-		rtable.setPredecessor(null, 0);
+		rtable.setPredecessor(null, -1);
 	}
-	
 	
 	public void onReceive(EndPoint src, NotifyMessage m) {
-		if (rtable.predecessor.endpoint == null || (m.getPredKey() > rtable.getPredecessor().key && m.getPredKey() < this.chordKey))
+		if (rtable.getPredecessor().key == -1 || contains(rtable.getPredecessor().key,chordKey,m.getPredKey())) {
 			rtable.setPredecessor(m.getPredecessor(), m.getPredKey());
+			System.out.println("Predecessor updated considering:\n[ "+rtable.getPredecessor().key+" ; "+m.getPredKey()+" ; "+chordKey+" ]");
+		}
 	}
-	
+
 	public void onReceive(EndPoint src, LookupMessage m) {
 		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
@@ -157,25 +168,32 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			this.udpSend(m.getSource(),new LookupReply(chordKey, endpoint, m.getFingerNumber()));
 		}
 	}
-	
+
 	public void onReceive(EndPoint src, GiefSuccessor m) {
 		EndPoint nextHop = rtable.nextHop( m.getKey() );
 		if (nextHop != null && nextHop != this.endpoint) {
+			System.out.println("AYE? "+m.getKey()+" "+chordKey);
 			this.udpSend(nextHop, new GiefSuccessor(m));
 		} else {
+			System.out.println("AYE! "+m.getKey()+" "+chordKey);
 			RTableEntry successor = rtable.getSuccessor();
 			this.udpSend(m.getSource(),new HereIsYourSuccessor(successor.key, successor.endpoint));
 		}
 	}
-	
-	
-	
+
+
+
 	public void onReceive(EndPoint src, HereIsYourSuccessor m) {
 		rtable.setSuccessor(m.getSuccessor(),m.getSuccKey());
-		initNewNode();
+		
+		System.out.println("Successor retrieved from: "+src.address.pos);
+		System.out.println("at Node: "+chordKey);
+		System.out.println("with position: "+m.getSuccKey());
+		System.out.println();
 		fingerize();
+		initNewNode();
 	}
-	
+
 	public void onReceive(EndPoint src, LookupReply m) {
 		rtable.setFinger(m.getFingerNumber(),m.getSuccessor(),m.getSuccKey());
 	}
@@ -184,25 +202,25 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	class ChordRoutingTable implements Displayable {
 		int currentFinger = 0;
 		final double ownKey;
-		RTableEntry predecessor = new RTableEntry(0,null);
+		RTableEntry predecessor = new RTableEntry(-1,null);
 		RTableEntry[] fingers = new RTableEntry[NodeDB.MAX_KEY_LENGTH];
 
 		ChordRoutingTable(Node owner) {
 			this.ownKey = owner.chordKey;
 		}
-		
+
 		RTableEntry getSuccessor() {
 			return fingers[fingers.length-1];
 		}
-		
+
 		RTableEntry getPredecessor() {
 			return predecessor;
 		}
-		
+
 		void setSuccessor(EndPoint nsuc,double nsucKey) {
 			fingers[fingers.length-1] = new RTableEntry(nsucKey,nsuc);
 		}
-		
+
 		void setPredecessor(EndPoint npred,double npredKey) {
 			predecessor = new RTableEntry(npredKey,npred);
 		}
@@ -210,7 +228,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		void setFinger(int nFinger, EndPoint finger, double fingerKey) {
 			fingers[nFinger] = new RTableEntry(fingerKey,finger);
 		}
-		
+
 		void populate(Collection<Node> nodes) {
 
 			TreeSet<Node> sn = new TreeSet<Node>( new ChordNodeSorter( exactFingerKey(0)));
@@ -255,7 +273,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			double k = ownKey + Math.pow(2, -(j + 1));
 			return k < 1 ? k : k - 1.0;
 		}
-		
+
 		double distanceBetween(double key, double candidate) {
 			double d = key - candidate;
 			return d >= 0 ? d : d + 1.0;
@@ -290,25 +308,33 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			gs.setColor( Color.DARK_GRAY ) ;
 			gs.setStroke( new BasicStroke(2.0f)) ;
 			for( RTableEntry i : fingers ) {
-				if (i != null) {
-				final XY radius = new XY(10,10) ;
-				Node other = (Node) i.endpoint.handler ;
-				gs.fill( new Ellipse( other.pos, radius ) ) ;
+				if (i != null && i.endpoint != null) {
+					final XY radius = new XY(10,10) ;
+					Node other = (Node) i.endpoint.handler ;
+					gs.fill( new Ellipse( other.pos, radius ) ) ;
 				}
 			}
 			double j = 0.75 ;
 			for( RTableEntry i : fingers ) {
-				if (i!=null) {
+				if (i != null && i.endpoint!=null) {
+					j *= 1.5 ;
+					Node other = (Node) i.endpoint.handler ;				
+					XY m = pos.add(other.pos).mult(0.5) ;
+					XY c = new XY( m.x + (500 - m.x) / j, m.y + (500-m.y) / j ) ;
+					gs.draw( new QuadCurve( pos.x, pos.y, c.x, c.y, other.pos.x, other.pos.y) ) ;
+				}
+			}
+			if (predecessor.endpoint != null) {
 				j *= 1.5 ;
-				Node other = (Node) i.endpoint.handler ;				
+				Node other = (Node) predecessor.endpoint.handler ;				
 				XY m = pos.add(other.pos).mult(0.5) ;
 				XY c = new XY( m.x + (500 - m.x) / j, m.y + (500-m.y) / j ) ;
+				gs.setColor(Color.BLUE);
 				gs.draw( new QuadCurve( pos.x, pos.y, c.x, c.y, other.pos.x, other.pos.y) ) ;
-				}
-				}
+			}
 		}
 	}
-	
+
 	class RTableEntry {
 		double key;
 		EndPoint endpoint;
@@ -318,5 +344,5 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			endpoint = e;
 		}
 	}
-	
+
 }

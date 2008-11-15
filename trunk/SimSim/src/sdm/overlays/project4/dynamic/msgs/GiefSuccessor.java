@@ -16,7 +16,7 @@ public class GiefSuccessor extends Message {
 	private int hopCount = 1 ;
 	
 	public GiefSuccessor( EndPoint src, double key ) {
-		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.RED);
 		this.key = key ;
 		this.src = src;
 	}
