@@ -14,7 +14,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 500 ;
+	public static final int TOTAL_NODES = 10 ;
 	public Node starter;
 	
 	public static Random generator = new Random();
@@ -39,7 +39,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(0.2) ;
+		super.setSimulationMaxTimeWarp(0.05) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
@@ -72,16 +72,16 @@ public class Main extends Simulation implements Displayable {
 //		ns.rtable.setSuccessor(ns.endpoint, ns.chordKey);
 //		starter = ns;
 		
-//		new Task(0) {
-//			public void run() {
-//				NodeDB.randomNode().crash();
-//				reSchedule(0.5 + 0.5 * rg.nextDouble()) ; //schedules a new execution of this task...
-//			}
-//		};
+		new Task(0.5) {
+			public void run() {
+				NodeDB.randomNode().crash();
+				reSchedule(0.5 + 0.5 * rg.nextDouble()) ; //schedules a new execution of this task...
+			}
+		};
 		
 	    // From time to time, create a new node. If the rate of births and deaths is the same,
 		// the size of the system should stay constant on average.
-		new Task(1.0) {
+		new Task(0.5) {
 			public void run() {
 				System.out.println("A new node was born.");
 				Node contact = NodeDB.randomNode();
