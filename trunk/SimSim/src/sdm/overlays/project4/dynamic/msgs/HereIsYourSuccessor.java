@@ -17,6 +17,7 @@ public class HereIsYourSuccessor extends Message {
 	public HereIsYourSuccessor( double key, EndPoint succ ) {
 		super(false, Color.RED );
 		this.succ = succ;
+		this.key = key;
 	}
 	
 	public EndPoint getSuccessor() {

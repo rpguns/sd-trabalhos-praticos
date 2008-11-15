@@ -55,7 +55,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void initNewNode() {
 		words = new RandomList<Word>(WordsDB.randomWords(10));
-/*
+
 		new PeriodicTask(0.2) {
 			public void run() {
 				stabilize();
@@ -72,7 +72,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			public void run() {
 				refreshFingers();
 			}
-		};*/
+		};
 
 	}
 
@@ -116,7 +116,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		double fingerKey = rtable.exactFingerKey(currentFinger);
 		onReceive(endpoint, new LookupMessage(endpoint,fingerKey,currentFinger));
 		currentFinger++;
-		if (currentFinger == NodeDB.MAX_KEY_LENGTH)
+		if (currentFinger >= rtable.fingers.length)
 			currentFinger = 0;
 	}
 
@@ -154,9 +154,10 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	}
 	
 	public void onReceive(EndPoint src, NotifyMessage m) {
-		if (rtable.getPredecessor().key == -1 || contains(rtable.getPredecessor().key,chordKey,m.getPredKey())) {
+		if (rtable.getPredecessor().endpoint == null || contains(rtable.getPredecessor().key,chordKey,m.getPredKey())) {
 			rtable.setPredecessor(m.getPredecessor(), m.getPredKey());
 			System.out.println("Predecessor updated considering:\n[ "+rtable.getPredecessor().key+" ; "+m.getPredKey()+" ; "+chordKey+" ]");
+		
 		}
 	}
 
@@ -176,7 +177,9 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 			this.udpSend(nextHop, new GiefSuccessor(m));
 		} else {
 			System.out.println("AYE! "+m.getKey()+" "+chordKey);
+			
 			RTableEntry successor = rtable.getSuccessor();
+			System.out.println("AYE Result: "+successor.key);
 			this.udpSend(m.getSource(),new HereIsYourSuccessor(successor.key, successor.endpoint));
 		}
 	}
@@ -190,12 +193,13 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		System.out.println("at Node: "+chordKey);
 		System.out.println("with position: "+m.getSuccKey());
 		System.out.println();
-		fingerize();
+		//fingerize();
 		initNewNode();
 	}
 
 	public void onReceive(EndPoint src, LookupReply m) {
 		rtable.setFinger(m.getFingerNumber(),m.getSuccessor(),m.getSuccKey());
+		//System.out.println("Finger #"+m.getFingerNumber()+" updated at "+chordKey+" with keyValue "+m.getSuccKey());
 	}
 
 	/* Implements the Chord Routing Table */

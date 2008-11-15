@@ -18,6 +18,7 @@ public class LookupReply extends Message {
 	public LookupReply( double key, EndPoint succ, int nFinger ) {
 		super(false, Color.BLUE );
 		this.succ = succ;
+		this.key = key;
 		this.fingerNumber = nFinger;
 	}
 	
