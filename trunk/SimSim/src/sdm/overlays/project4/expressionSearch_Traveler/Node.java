@@ -68,8 +68,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 				new HashMap<EndPoint,Pair<Word,Word>>(10));
 		queryTimers.put(queryKey, 0);
 
-		this.travel(endpoint,p1,p2,0,rtable.fingers[0].endpoint,PARTITION_LEVELS-1);
-		udpSend(rtable.fingers[0].endpoint, new TravelMessage(endpoint,p1,p2,0,endpoint,PARTITION_LEVELS-1));
+		this.travel(endpoint,p1,p2,-1,endpoint,PARTITION_LEVELS);
 		sentMessages++;
 	}
 

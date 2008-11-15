@@ -15,7 +15,7 @@ import sdm.overlays.words.*;
 public class Main extends Simulation implements Displayable {
 
 	public int delay = 5;
-	public static final int TOTAL_NODES = 300 ;
+	public static final int TOTAL_NODES = 2000 ;
 	public static Random generator = new Random();
 	public static final int NUM_OF_QUERIES = 500 ;
 	int sentQueries = 0;
@@ -38,7 +38,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(0.08) ;
+		super.setSimulationMaxTimeWarp(5) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
