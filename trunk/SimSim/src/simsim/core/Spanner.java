@@ -1,12 +1,13 @@
 package simsim.core;
 
-import simsim.graphs.*;
-import simsim.utils.*;
-import static simsim.core.Simulation.*;
-
 import java.awt.*;
 import java.util.*;
 import java.awt.geom.*;
+
+import simsim.utils.*;
+import simsim.graphs.*;
+import static simsim.core.Simulation.*;
+
 
 /**
  * 
@@ -60,6 +61,24 @@ public class Spanner implements Displayable {
 		return res;
 	}
 
+	/**
+	 * Given a node, chosen as the root node of a shortest paths tree, this
+	 * method returns the parent node of a given child node.
+	 * 
+	 * The shortest paths tree is computed as needed from the spanner graph
+	 * produced by the current Threshold value, which can be changed
+	 * using setThreshold().
+	 * 
+	 * @param root -
+	 *            The root node of the shortest paths tree.
+	 * @param node -
+	 *             the child node .
+	 * @return the parent node of the given child node, according to the shortest paths tree in question.
+	 */	
+	public NetAddress parent( NetAddress root, NetAddress child) {
+		return root.equals( child) ? null : shortestPathsTree(root).parent( child) ;
+	}
+	
 	// ------------------------------------------------------------------------------------------------------------------
 	public void display(Graphics2D gu, Graphics2D gs) {
 
@@ -84,11 +103,10 @@ public class Spanner implements Displayable {
 		}
 	}
 
-	ShortestPathsTree<NetAddress> shortestPathsTree(NetAddress root) {
+	ShortestPathsTree<NetAddress> shortestPathsTree( NetAddress root) {
 		ShortestPathsTree<NetAddress> res = trees.get(root);
 		if (res == null) {
-			//res = new ShortestPathsTree<NetAddress>(root, spanner());
-			res = shortestPaths().symetricTree(root) ;
+			res = new ShortestPathsTree<NetAddress>(root, spanner());
 			trees.put(root, res);
 		}
 		return res;
@@ -99,13 +117,6 @@ public class Spanner implements Displayable {
 			spanner = spanner(K);
 		}
 		return spanner;
-	}
-
-	private ShortestPaths<NetAddress> shortestPaths() {
-		if (shortestPaths == null) {
-			shortestPaths = new ShortestPaths<NetAddress>( spanner(K) ) ;
-		}
-		return shortestPaths;
 	}
 	
 	private kSpanner<NetAddress> spanner(float f) {
@@ -126,6 +137,5 @@ public class Spanner implements Displayable {
 	
 	private float K = 5.0f;
 	private kSpanner<NetAddress> spanner = null;
-	private ShortestPaths<NetAddress> shortestPaths = null;
 	private Map<NetAddress, ShortestPathsTree<NetAddress>> trees = new HashMap<NetAddress, ShortestPathsTree<NetAddress>>();
 }

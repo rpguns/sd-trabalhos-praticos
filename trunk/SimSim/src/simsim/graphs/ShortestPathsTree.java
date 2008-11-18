@@ -50,11 +50,14 @@ public class ShortestPathsTree<T> {
 		return children.get( node ) ;
 	}
 	
+	public T parent( T node ) {
+		return parents.get( node ) ;
+	}
+	
 	public Set<Link<T>> edges() {
 		return edges ;
 	}
-	
-	
+		
 	Set<Link<T>> path( T node ) {
 		if( paths == null ) computePaths() ;
 		return paths.get( node ) ;
