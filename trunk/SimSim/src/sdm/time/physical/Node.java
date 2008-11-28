@@ -42,6 +42,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	private void initClockSynchronizationTask() {		
 		new PeriodicTask(this, 10*rg.nextDouble(), 5.0) {
 			public void run() {
+				System.out.println("current time is"+currentTime());
 				udpSend( parent, new SyncTimeRequest( currentTime() ));
 			}
 		};		
@@ -54,9 +55,12 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void onReceive(EndPoint src, SyncTimeReply m) {		
 		double rtt = this.currentTime() - m.timeStamp ;
 		
-		double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
 
+		double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
+		System.out.println("Offset Adjustment Received at Node = "+this.index);
+		System.out.println("Current Time = "+super.currentTime()+" | Offset Received = "+offset);
 		super.clock.adjustClock( offset) ;
+		System.out.println("New Time = "+super.currentTime()+"\n");
 	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {

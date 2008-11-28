@@ -23,7 +23,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(2.0) ;
+		super.setSimulationMaxTimeWarp(10) ;
 		
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 		
@@ -68,7 +68,7 @@ public class Main extends Simulation implements Displayable {
 			}
 		};
 		
-		new PeriodicTask(10.0) {
+		new PeriodicTask(2.0) {
 			public void run() {
 				int i = 0;
 				int j = 0;

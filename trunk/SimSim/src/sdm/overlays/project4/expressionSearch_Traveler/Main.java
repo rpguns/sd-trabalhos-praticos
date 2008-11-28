@@ -38,7 +38,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		super.setSimulationMaxTimeWarp(5) ;
+		super.setSimulationMaxTimeWarp(10) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 640, 640);
 
@@ -87,7 +87,7 @@ public class Main extends Simulation implements Displayable {
 					//System.out.println("Node: " + n.chordKey +
 					//" Neighbour: " + n.rtable.fingers[n.rtable.fingers.length-1].key);
 					NodeDB.randomNode().circularQuery(pattern1,pattern2);
-					reSchedule( /*0.5 + (1.5 * rg.nextDouble() )*/ 2) ; //schedules a new execution of this task...
+					reSchedule( 6.0 + (1.5 * rg.nextDouble() )) ; //schedules a new execution of this task...
 				}
 				delay++;
 			}
