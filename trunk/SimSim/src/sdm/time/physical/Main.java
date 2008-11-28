@@ -15,14 +15,15 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		Spanner.setThreshold( 1.01) ;
+		double k = 1.001;
+		Spanner.setThreshold( k) ;
 
-		final XYLineChart chart = new XYLineChart("Maximum clock skew", 5.0, "Maximum Skew (ms)", "time(s)") ;
+		final XYLineChart chart = new XYLineChart("Maximum clock skew with k = "+k, 5.0, "Maximum Skew (ms)", "time(s)") ;
 //		chart.setYRange( false, 0, 100 ) ;
 		chart.setSeriesLinesAndShapes("s0", true, false) ;
 
 		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480) ;
-		Gui.setFrameRectangle("Maximum clock skew", 484, 0, 480, 480) ;
+		Gui.setFrameRectangle("Maximum clock skew with k = "+k, 484, 0, 480, 480) ;
 		//Create the simulation nodes
 		for( int i = 0 ; i < TOTAL_NODES ; i++ ) 
 			new Node() ;
