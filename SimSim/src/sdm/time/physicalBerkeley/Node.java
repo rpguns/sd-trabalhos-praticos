@@ -14,6 +14,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	private NetAddress parent ;
 	private Set<NetAddress> children;
 	private LinkedList<Pair<NetAddress,Double>> childrenTimes;
+	private boolean isRoot = false;
 
 	public Node() {
 		super( true ); // This node will have its own clock, with drift and skew...
@@ -28,6 +29,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void init( NetAddress rootNode) {
 		if( rootNode == this.address ) {
+			isRoot = true;
 			clock.isMasterClock( true );
 			super.setColor( Color.getHSBColor(0.0f, 0.5f, 0.8f)) ;	
 		}
@@ -37,7 +39,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	
 		children = Spanner.children(rootNode, this.address);
 		
-		if( parent != null )
+		//if( parent != null )
 			initClockSynchronizationTask() ;
 	}
 	
@@ -46,7 +48,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	// Usa algoritmo de Cristian numa √°rvore.
 	// i.e., Cada n√≥, periodicamente, pede o valor do rel√≥gio ao pai, calcula o desvio com a resposta e faz o acerto no seu rel√≥gio.
 	private void initClockSynchronizationTask() {		
-		new PeriodicTask(this, 10*rg.nextDouble(), 5.0) {
+		new PeriodicTask(this, 10*rg.nextDouble(), 1.0) {
 			public void run() {
 				//mesmo currentTime ou meto currentTime() na mensagem?
 				double currTime = currentTime();
@@ -60,31 +62,58 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		udpSend(src, new SyncTimeReply( m.timeStamp, this.currentTime()));
 	}
 
-	public void onReceive(EndPoint src, SyncTimeReply m) {
-		//System.out.println("Current time is"+currentTime());
-		double rtt = this.currentTime() - m.timeStamp ;
-		//System.out.println("received time from"+src+" "+(m.referenceTime+rtt/2)+" at "+currentTime()+" with rtt "+rtt);
-//		
+//	public void onReceive(EndPoint src, SyncTimeReply m) {
+//		//System.out.println("Current time is"+currentTime());
+//		double rtt = this.currentTime() - m.timeStamp ;
+//		//System.out.println("received time from"+src+" "+(m.referenceTime+rtt/2)+" at "+currentTime()+" with rtt "+rtt);
+//			
 //		double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
 //		
-		childrenTimes.add(new Pair<NetAddress,Double>(src.address,m.referenceTime+rtt/2));
+//		childrenTimes.add(new Pair<NetAddress,Double>(src.address,m.referenceTime+rtt/2));
+//		
+//		if (childrenTimes.size() == children.size()) {
+//			//Qual È o tempo que queremos aqui? quando mandamos ou quando recebemos?
+//			double avg = m.timeStamp+rtt;
+//			System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
+//			for (Pair<NetAddress,Double> x:childrenTimes)
+//				avg += x.getSecond();
+//			avg /= (children.size()+1);
+//			
+//			//System.out.println("average was "+avg+" time is "+currentTime());
+//			
+//			for (Pair<NetAddress,Double> child:childrenTimes)
+//				udpSend(child.getFirst(),new OffsetMessage(avg-child.getSecond()));
+//			childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
+//			}
+//			//udpSend(src,new OffsetMessage((m.timeStamp+rtt/2)-currentTime()));
+//		}
+	
+	
+	public void onReceive(EndPoint src, SyncTimeReply m) {
+	//System.out.println("Current time is"+currentTime());
+	double rtt = this.currentTime() - m.timeStamp ;
+	//System.out.println("received time from"+src+" "+(m.referenceTime+rtt/2)+" at "+currentTime()+" with rtt "+rtt);
 		
-		/*if (childrenTimes.size() == children.size()) {
-			//Qual È o tempo que queremos aqui? quando mandamos ou quando recebemos?
-			double avg = m.timeStamp+rtt;
-			System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
-			/*for (Pair<NetAddress,Double> x:childrenTimes)
-				avg += x.getSecond();
-			avg /= (children.size()+1);
-			
-			//System.out.println("average was "+avg+" time is "+currentTime());
-			
-			for (Pair<NetAddress,Double> child:childrenTimes)
-				udpSend(child.getFirst(),new OffsetMessage(avg-child.getSecond()));
-			childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
-			}*/
-			udpSend(src,new OffsetMessage((m.timeStamp+rtt/2)-currentTime()));
+	double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
+	
+	childrenTimes.add(new Pair<NetAddress,Double>(src.address,m.referenceTime));
+	
+	if (childrenTimes.size() == children.size()) {
+		//Qual È o tempo que queremos aqui? quando mandamos ou quando recebemos?
+		double avg = m.timeStamp+rtt;
+		System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
+		for (Pair<NetAddress,Double> x:childrenTimes)
+			avg += x.getSecond();
+		avg /= (children.size()+1);
+		
+		//System.out.println("average was "+avg+" time is "+currentTime());
+		
+		for (Pair<NetAddress,Double> child:childrenTimes)
+			udpSend(child.getFirst(),new OffsetMessage(avg-child.getSecond()));
+		childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
 		}
+		//udpSend(src,new OffsetMessage((m.timeStamp+rtt/2)-currentTime()));
+	}
 	
 	public void onReceive(EndPoint src, OffsetMessage m) {
 		//System.out.println(m.offset);
