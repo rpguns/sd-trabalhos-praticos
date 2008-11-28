@@ -18,7 +18,7 @@ public class PutMessage extends Message {
 	protected int hopCount = 1;
 	
 	public PutMessage( Word word, EndPoint origin ) {
-		super(true, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
+		super(false, Color.getHSBColor( rg.nextFloat(), 0.6f, 0.6f) );
 		this.word = word;
 		this.origin = origin;
 		this.dst = word.dHashValue();
@@ -51,7 +51,7 @@ public class PutMessage extends Message {
 	}
 	
 	public void display(  Graphics2D gu,  Graphics2D gs, EndPoint src, EndPoint dst, double t, double p) {
-		
+		/*
 		Node a = (Node) src.handler ;
 		Node b = (Node) dst.handler ;
 
@@ -65,7 +65,7 @@ public class PutMessage extends Message {
     	gs.draw( qc ) ;
 
     	if( t >= 0)
-      		gs.fill( new Circle( qc.interpolate( p), 12) ) ;
+      		gs.fill( new Circle( qc.interpolate( p), 12) ) ;*/
   	
 	}
 }
