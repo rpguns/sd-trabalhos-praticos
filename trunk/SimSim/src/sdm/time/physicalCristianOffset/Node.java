@@ -1,4 +1,4 @@
-package sdm.time.physicalBerkeley;
+package sdm.time.physicalCristianOffset;
 
 import java.awt.*;
 
@@ -62,63 +62,13 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		udpSend(src, new SyncTimeReply( m.timeStamp, this.currentTime()));
 	}
 
-//	public void onReceive(EndPoint src, SyncTimeReply m) {
-//		//System.out.println("Current time is"+currentTime());
-//		double rtt = this.currentTime() - m.timeStamp ;
-//		//System.out.println("received time from"+src+" "+(m.referenceTime+rtt/2)+" at "+currentTime()+" with rtt "+rtt);
-//			
-//		double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
-//		
-//		childrenTimes.add(new Pair<NetAddress,Double>(src.address,m.referenceTime+rtt/2));
-//		
-//		if (childrenTimes.size() == children.size()) {
-//			//Qual é o tempo que queremos aqui? quando mandamos ou quando recebemos?
-//			double avg = m.timeStamp+rtt;
-//			System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
-//			for (Pair<NetAddress,Double> x:childrenTimes)
-//				avg += x.getSecond();
-//			avg /= (children.size()+1);
-//			
-//			//System.out.println("average was "+avg+" time is "+currentTime());
-//			
-//			for (Pair<NetAddress,Double> child:childrenTimes)
-//				udpSend(child.getFirst(),new OffsetMessage(avg-child.getSecond()));
-//			childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
-//			}
-//			//udpSend(src,new OffsetMessage((m.timeStamp+rtt/2)-currentTime()));
-//		}
-	
 	
 	public void onReceive(EndPoint src, SyncTimeReply m) {
-	//System.out.println("Current time is"+currentTime());
-	double rtt = this.currentTime() - m.timeStamp ;
-	//System.out.println("received time from"+src+" "+(m.referenceTime+rtt/2)+" at "+currentTime()+" with rtt "+rtt);
+		double rtt = this.currentTime() - m.timeStamp ;
 		
-	double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
-
-	
-	childrenTimes.add(new Pair<NetAddress,Double>(src.address,offset));
-	
-	if (childrenTimes.size() == children.size()) {
-		//Qual é o tempo que queremos aqui? quando mandamos ou quando recebemos?
-		double avg = 0;//+rtt/2;
+		double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
 		
-		//System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
-		for (Pair<NetAddress,Double> x:childrenTimes)
-			avg += x.getSecond();
-		avg /= (children.size()+1);
-		
-		super.clock.adjustClock(avg);
-		
-		//System.out.println("average was "+avg+" time is "+currentTime());
-		
-		for (Pair<NetAddress,Double> child:childrenTimes) 
-			udpSend(child.getFirst(),new OffsetMessage(avg-child.getSecond()));
-		childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
-		}
-	
-		//System.out.println("Child had "+m.referenceTime+" at moment "+(m.timeStamp+rtt/2)+" sending offset: "+offset);
-		//udpSend(src,new OffsetMessage(offset));
+		udpSend(src,new OffsetMessage(-offset));
 	}
 	
 	public void onReceive(EndPoint src, OffsetMessage m) {

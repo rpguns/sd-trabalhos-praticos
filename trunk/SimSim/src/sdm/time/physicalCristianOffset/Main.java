@@ -1,4 +1,4 @@
-package sdm.time.physical;
+package sdm.time.physicalCristianOffset;
 
 import java.awt.*;
 import java.util.*;
@@ -15,7 +15,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		Spanner.setThreshold( 1.01) ;
+		Spanner.setThreshold( 2) ;
 
 		final XYLineChart chart = new XYLineChart("Maximum clock skew", 5.0, "Maximum Skew (ms)", "time(s)") ;
 //		chart.setYRange( false, 0, 100 ) ;
