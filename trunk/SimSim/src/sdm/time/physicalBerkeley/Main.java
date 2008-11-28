@@ -15,7 +15,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		Spanner.setThreshold( 2) ;
+		Spanner.setThreshold( 1.01) ;
 
 		final XYLineChart chart = new XYLineChart("Maximum clock skew", 5.0, "Maximum Skew (ms)", "time(s)") ;
 //		chart.setYRange( false, 0, 100 ) ;

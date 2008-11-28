@@ -48,7 +48,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	// Usa algoritmo de Cristian numa árvore.
 	// i.e., Cada nó, periodicamente, pede o valor do relógio ao pai, calcula o desvio com a resposta e faz o acerto no seu relógio.
 	private void initClockSynchronizationTask() {		
-		new PeriodicTask(this, 10*rg.nextDouble(), 1.0) {
+		new PeriodicTask(this, 10*rg.nextDouble(), 5.0) {
 			public void run() {
 				//mesmo currentTime ou meto currentTime() na mensagem?
 				double currTime = currentTime();
@@ -95,32 +95,37 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	//System.out.println("received time from"+src+" "+(m.referenceTime+rtt/2)+" at "+currentTime()+" with rtt "+rtt);
 		
 	double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
+
 	
-	childrenTimes.add(new Pair<NetAddress,Double>(src.address,m.referenceTime));
+	childrenTimes.add(new Pair<NetAddress,Double>(src.address,offset));
 	
 	if (childrenTimes.size() == children.size()) {
 		//Qual � o tempo que queremos aqui? quando mandamos ou quando recebemos?
-		double avg = m.timeStamp+rtt;
-		System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
+		double avg = 0;//+rtt/2;
+		
+		//System.out.println("timestamprtt "+(m.timeStamp+rtt)+" tempo real "+currentTime());
 		for (Pair<NetAddress,Double> x:childrenTimes)
 			avg += x.getSecond();
 		avg /= (children.size()+1);
 		
 		//System.out.println("average was "+avg+" time is "+currentTime());
 		
-		for (Pair<NetAddress,Double> child:childrenTimes)
+		for (Pair<NetAddress,Double> child:childrenTimes) 
 			udpSend(child.getFirst(),new OffsetMessage(avg-child.getSecond()));
+		super.clock.adjustClock(avg);
 		childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
 		}
-		//udpSend(src,new OffsetMessage((m.timeStamp+rtt/2)-currentTime()));
+	
+		//System.out.println("Child had "+m.referenceTime+" at moment "+(m.timeStamp+rtt/2)+" sending offset: "+offset);
+		//udpSend(src,new OffsetMessage(offset));
 	}
 	
 	public void onReceive(EndPoint src, OffsetMessage m) {
 		//System.out.println(m.offset);
-		System.out.println("Offset Adjustment Received at Node = "+this.index);
-		System.out.println("Current Time = "+super.currentTime()+" | Offset Received = "+m.offset);
+		//System.out.println("Offset Adjustment Received at Node = "+this.index);
+		//System.out.println("Current Time = "+super.currentTime()+" | Offset Received = "+m.offset);
 		super.clock.adjustClock(m.offset); 
-		System.out.println("New Time = "+super.currentTime()+"\n");
+		//System.out.println("New Time = "+super.currentTime()+"\n");
 	}
 	
 	public void display(Graphics2D gu, Graphics2D gs) {
