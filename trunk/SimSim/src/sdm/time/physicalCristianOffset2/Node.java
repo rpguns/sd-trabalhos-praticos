@@ -1,4 +1,4 @@
-package sdm.time.physicalCristianOffset;
+package sdm.time.physicalCristianOffset2;
 
 import java.awt.*;
 
@@ -6,21 +6,25 @@ import simsim.core.*;
 import static simsim.core.Simulation.*;
 import java.util.*;
 
-import sdm.time.physicalBerkeley.msgs.*;
+import sdm.time.physicalCristianOffset2.msg.*;
 
 public class Node extends AbstractNode implements ExtendedMessageHandler, Displayable {
 
+
+	public static final int N_OF_TRIES = 3 ;
+
+	
 	public int index;
 	private NetAddress parent ;
 	private Set<NetAddress> children;
-	private LinkedList<Pair<NetAddress,Double>> childrenTimes;
-	private boolean isRoot = false;
+	//private LinkedList<Pair<NetAddress,Double>> childrenTimes;
+	private HashMap<EndPoint,LinkedList<Pair<Double,Double>>> childrenTimes;
 
 	public Node() {
 		super( true ); // This node will have its own clock, with drift and skew...
 		index = NodeDB.store(this);
 		super.setColor( Color.getHSBColor(0.2f, 0.3f, 0.9f)) ;
-		childrenTimes = new LinkedList<Pair<NetAddress,Double>>();
+		childrenTimes = new HashMap<EndPoint,LinkedList<Pair<Double,Double>>>();//new LinkedList<Pair<NetAddress,Double>>();
 	}
 
 	public String toString() {
@@ -29,7 +33,6 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	public void init( NetAddress rootNode) {
 		if( rootNode == this.address ) {
-			isRoot = true;
 			clock.isMasterClock( true );
 			super.setColor( Color.getHSBColor(0.0f, 0.5f, 0.8f)) ;	
 		}
@@ -38,6 +41,7 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 		parent = Spanner.parent( rootNode, this.address) ;
 	
 		children = Spanner.children(rootNode, this.address);
+		
 		
 		//if( parent != null )
 			initClockSynchronizationTask() ;
@@ -50,10 +54,11 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	private void initClockSynchronizationTask() {		
 		new PeriodicTask(this, 10*rg.nextDouble(), 5.0) {
 			public void run() {
-				//mesmo currentTime ou meto currentTime() na mensagem?
 				double currTime = currentTime();
-				for (NetAddress child:children)
-					udpSend( child, new SyncTimeRequest(currentTime()));
+				for (NetAddress child:children) {
+					for (int i = 0; i < N_OF_TRIES; i++)
+						udpSend( child, new SyncTimeRequest(currentTime()));
+				}
 			}
 		};		
 	}
@@ -64,14 +69,32 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 
 	
 	public void onReceive(EndPoint src, SyncTimeReply m) {
+		
+		if (childrenTimes.get(src) == null) childrenTimes.put(src, new LinkedList<Pair<Double,Double>>());
 		double rtt = this.currentTime() - m.timeStamp ;
 		
 		double offset = (m.referenceTime + rtt/2) - this.currentTime() ;
 		
-		udpSend(src,new OffsetMessage(-offset));
+		LinkedList<Pair<Double,Double>> rtts = childrenTimes.get(src);
+		
+		
+		rtts.add(new Pair<Double,Double>(rtt,offset));
+		
+		if (rtts.size() == N_OF_TRIES) {
+			Pair<Double,Double> best = new Pair<Double,Double>(rtt,offset);
+			for (Pair<Double,Double> x:rtts) {
+				System.out.println(x.getFirst()+" < "+best.getFirst());
+				if (x.getFirst() < best.getFirst())
+					best = x;
+			}
+			System.out.println("Went with"+best.getFirst()+" "+best.getSecond());
+			udpSend(src,new OffsetMessage(-best.getSecond()));
+			childrenTimes.put(src,new LinkedList<Pair<Double,Double>>());
+		}
 	}
 	
 	public void onReceive(EndPoint src, OffsetMessage m) {
+		System.out.println("Received offset "+m.offset);
 		super.clock.adjustClock(m.offset); 
 	}
 	
