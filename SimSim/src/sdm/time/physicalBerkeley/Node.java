@@ -30,8 +30,8 @@ public class Node extends AbstractNode implements ExtendedMessageHandler, Displa
 	public void init( NetAddress rootNode) {
 		if( rootNode == this.address ) {
 			isRoot = true;
-			clock.isMasterClock( true );
-			super.setColor( Color.getHSBColor(0.0f, 0.5f, 0.8f)) ;	
+			//clock.isMasterClock( true );
+			//super.setColor( Color.getHSBColor(0.0f, 0.5f, 0.8f)) ;	
 		}
 		
 		// Dado o nó com o relógio de referência, que será raiz da árvore de sincronização, obtém o pai do nó corrente nessa árvore.

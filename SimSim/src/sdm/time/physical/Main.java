@@ -15,7 +15,7 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
-		double k = 1.001;
+		double k = 3;
 		Spanner.setThreshold( k) ;
 
 		final XYLineChart chart = new XYLineChart("Maximum clock skew with k = "+k, 5.0, "Maximum Skew (ms)", "time(s)") ;
@@ -60,7 +60,7 @@ public class Main extends Simulation implements Displayable {
 		Globals.set("Sim_RandomSeed", 9L);
 		Globals.set("Net_RandomSeed", 1L);
 
-		Globals.set("Net_Jitter", 0.5);
+		Globals.set("Net_Jitter", 1.5);
 
 		Globals.set("Net_FontSize", 120.0f ) ;
 		Globals.set("Net_Euclidean_NodeRadius", 32.0);
