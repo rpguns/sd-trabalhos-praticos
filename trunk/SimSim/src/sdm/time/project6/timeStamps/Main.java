@@ -80,7 +80,7 @@ public class Main extends Simulation implements Displayable {
 		Globals.set("Sim_RandomSeed", 9L);
 		Globals.set("Net_RandomSeed", 2L);
 
-		Globals.set("Net_Jitter", 10.0);
+		Globals.set("Net_Jitter", 0.0);
 
 		
 		Globals.set("Net_FontSize", 16.0f ) ;
