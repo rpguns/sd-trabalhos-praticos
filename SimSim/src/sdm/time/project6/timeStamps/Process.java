@@ -52,7 +52,7 @@ public class Process extends Middleware implements ProcessMessageHandler {
 	private void submitAreaOperation() {
 		char op = OpGenerator.generate() ;
 		Shape shape = ShapeGenerator.generate() ;
-		FO_multicast( new ShapeOperation( op, shape) ) ;		
+		TO_multicast( new ShapeOperation( op, shape) ) ;		
 	}
 	
 	public void onReceive(EndPoint src, ChangeColor m) {
@@ -87,9 +87,8 @@ public class Process extends Middleware implements ProcessMessageHandler {
 		 */
 		if( ! state.isEmpty() ) {		
 			Color newColor = Color.getHSBColor( rg.nextFloat(), 0.3f + 0.3f * rg.nextFloat(), 0.9f) ;	
-			//TO_multicast( new ChangeColor( newColor ) ) ;
-			FO_multicast( new ChangeColor( newColor ) ) ;
-			
+			TO_multicast( new ChangeColor( newColor ) ) ;
+
 		}		
 	}
 	
