@@ -87,7 +87,9 @@ public class Process extends Middleware implements ProcessMessageHandler {
 		 */
 		if( ! state.isEmpty() ) {		
 			Color newColor = Color.getHSBColor( rg.nextFloat(), 0.3f + 0.3f * rg.nextFloat(), 0.9f) ;	
-			TO_multicast( new ChangeColor( newColor ) ) ;
+			//TO_multicast( new ChangeColor( newColor ) ) ;
+			FO_multicast( new ChangeColor( newColor ) ) ;
+			
 		}		
 	}
 	

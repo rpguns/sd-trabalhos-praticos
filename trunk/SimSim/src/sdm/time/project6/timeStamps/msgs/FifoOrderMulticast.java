@@ -1,15 +1,16 @@
 package sdm.time.project6.timeStamps.msgs;
 
-import simsim.core.*; 
+import simsim.core.*;
+import sdm.time.project6.timeStamps.clocks.*;
 
 @SuppressWarnings("serial")
 public class FifoOrderMulticast extends Message {
 
-	public int seq ;
+	public TimeStamp seq ;
 	public EndPoint src ;
 	public Message payload ;
 	
-	public FifoOrderMulticast( int seq, EndPoint src, Message p ) {
+	public FifoOrderMulticast( TimeStamp seq, EndPoint src, Message p ) {
 		super( true, p.color ) ;
 		this.seq = seq ;
 		this.payload = p ;
