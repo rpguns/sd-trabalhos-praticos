@@ -7,7 +7,7 @@ import simsim.utils.*;
 import simsim.gui.geom.*;
 import static simsim.core.Simulation.*;
 
-import sdm.time.project6.timeStamps.msgs.*;
+import sdm.time.project6.tco.msgs.*;
 
 public class Node extends AbstractNode implements NodeMessageHandler, Displayable {
 

@@ -6,7 +6,7 @@ import java.awt.geom.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
-import sdm.time.project6.timeStamps.msgs.*;
+import sdm.time.project6.tco.msgs.*;
 import static simsim.core.Simulation.*;
 
 

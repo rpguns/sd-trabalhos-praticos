@@ -3,7 +3,7 @@ package sdm.time.project6.tco;
 import java.util.* ;
 
 import simsim.core.*;
-import sdm.time.project6.timeStamps.msgs.*;
+import sdm.time.project6.tco.msgs.*;
 
 public class Middleware extends Node implements MiddlewareMessageHandler {
 	
