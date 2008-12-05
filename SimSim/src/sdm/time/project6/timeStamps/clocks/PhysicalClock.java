@@ -50,6 +50,10 @@ public class PhysicalClock extends AbstractClock {
 		private  boolean concurrent(TS other) {
 			return value == other.value ;
 		}
+		
+		public  double value() {
+			return value;
+		}
 
 		public String toString() {
 			return "" + value ;

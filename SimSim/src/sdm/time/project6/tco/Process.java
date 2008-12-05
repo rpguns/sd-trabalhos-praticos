@@ -53,6 +53,7 @@ public class Process extends Middleware implements ProcessMessageHandler {
 		char op = OpGenerator.generate() ;
 		Shape shape = ShapeGenerator.generate() ;
 		FO_multicast( new ShapeOperation( op, shape) ) ;		
+		
 	}
 	
 	public void onReceive(EndPoint src, ChangeColor m) {

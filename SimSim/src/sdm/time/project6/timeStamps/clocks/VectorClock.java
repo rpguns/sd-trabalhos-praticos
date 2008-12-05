@@ -74,6 +74,12 @@ public class VectorClock extends AbstractClock {
 		public boolean concurrent(TimeStamp other) {
 			return other != null & concurrent( (TS) other ) ;
 		}
+		
+		//TO FUCKING DO OR DELETE OR ENRABATE
+		public  double value() {
+			return 0;
+		}
+
 
 		private boolean concurrent( TS other) {
 			return ! equals( other) && ! this.lessOrEqual( other ) && ! other.lessOrEqual( this ) ;

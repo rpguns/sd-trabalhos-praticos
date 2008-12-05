@@ -55,6 +55,11 @@ public class LamportClock extends AbstractClock {
 			return false;
 		}
 
+		//TO FUCKING DO OR DELETE OR ENRABATE
+		public  double value() {
+			return 0;
+		}
+		
 		public String toString() {
 			return "" + value ;
 		}
