@@ -52,7 +52,7 @@ public class Process extends Middleware implements ProcessMessageHandler {
 	private void submitAreaOperation() {
 		char op = OpGenerator.generate() ;
 		Shape shape = ShapeGenerator.generate() ;
-		FO_multicast( new ShapeOperation( op, shape) ) ;		
+		TO_multicast( new ShapeOperation( op, shape) ) ;		
 		
 	}
 	
