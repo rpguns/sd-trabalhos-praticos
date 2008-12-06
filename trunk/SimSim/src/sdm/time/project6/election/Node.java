@@ -1,4 +1,4 @@
-package sdm.time.project6.tco;
+package sdm.time.project6.election;
 
 import java.awt.*;
 
@@ -7,7 +7,7 @@ import simsim.utils.*;
 import simsim.gui.geom.*;
 import static simsim.core.Simulation.*;
 
-import sdm.time.project6.tco.msgs.*;
+import sdm.time.project6.election.msgs.*;
 
 public class Node extends AbstractNode implements NodeMessageHandler, Displayable {
 

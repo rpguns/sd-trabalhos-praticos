@@ -1,9 +1,9 @@
-package sdm.time.project6.tco;
+package sdm.time.project6.election;
 
 import java.util.* ;
 
 import simsim.core.*;
-import sdm.time.project6.tco.msgs.*;
+import sdm.time.project6.election.msgs.*;
 
 public class Middleware extends Node implements MiddlewareMessageHandler {
 	
