@@ -1,4 +1,4 @@
-package sdm.time.project6.election;
+package sdm.time.project6.timeStamps2;
 
 import java.awt.*;
 import java.util.*;
@@ -34,7 +34,6 @@ public class Main extends Simulation implements Displayable {
 		for( Node i : NodeDB.nodes ) 
 			i.init( masterNode.address ) ;
 		
-		
 		new PeriodicTask( 30, 5) {
 			public void run() {
 				int N = NodeDB.size() ;
@@ -66,12 +65,6 @@ public class Main extends Simulation implements Displayable {
 		
 		
 		setSimulationMaxTimeWarp(500) ;
-		
-		new Task(10) {
-			public void run() {
-				ProcessDB.randomProcess().beginElection();
-			};
-		};
 		return this ;
 	}
 	
@@ -87,7 +80,7 @@ public class Main extends Simulation implements Displayable {
 		Globals.set("Sim_RandomSeed", 9L);
 		Globals.set("Net_RandomSeed", 2L);
 
-		Globals.set("Net_Jitter", 10.0);
+		Globals.set("Net_Jitter", 2.0);
 
 		
 		Globals.set("Net_FontSize", 16.0f ) ;

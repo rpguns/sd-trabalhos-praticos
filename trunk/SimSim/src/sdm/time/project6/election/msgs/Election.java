@@ -22,6 +22,6 @@ public class Election extends Message {
 	 * @see sim.core.Message#deliverTo(sim.net.EndPoint, sim.core.MessageHandler)
 	 */
 	public void deliverTo( EndPoint src, MessageHandler handler ) {
-		((ProcessMessageHandler)handler).onReceive( src, this ) ;
+		((MiddlewareMessageHandler)handler).onReceive( src, this ) ;
 	}	
 }

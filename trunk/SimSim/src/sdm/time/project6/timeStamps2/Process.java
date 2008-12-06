@@ -1,12 +1,13 @@
-package sdm.time.project6.election;
+package sdm.time.project6.timeStamps2;
 
 import java.awt.*;
 import java.awt.geom.*;
 
+import java.util.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
-import sdm.time.project6.election.msgs.*;
+import sdm.time.project6.timeStamps.msgs.*;
 import static simsim.core.Simulation.*;
 
 
@@ -15,20 +16,45 @@ import static simsim.core.Simulation.*;
  *
  */
 public class Process extends Middleware implements ProcessMessageHandler {
-	
+
 	Area state ;
 	Color stateColor, bkgColor ;
 
 	Task docTask ;
+	Task dispatchTask ;
+	double nextTimeToSend = pClock.value().value();
+	TreeMap<Double,Message> messageQueue = new TreeMap<Double,Message>();
 	
+	double lastSendingTime = pClock.value().value();
+
 	public Process() {
 		ProcessDB.store(this) ;
-		
+
 		bkgColor = Color.white ;
 		stateColor = Color.gray ;
 		state = new Area( new Circle( 500, 500, 500 ) ) ;
 	}
+	
+	
 
+	public void dispatchQ() {
+		
+		
+		double first;
+		System.out.println("Hai? "+nextTimeToSend+" @ "+pClock.value().value());
+		while( !messageQueue.isEmpty() && canDispatch()) {
+			first = messageQueue.firstKey();
+			System.out.println("Dispatching...");
+			Message m = messageQueue.remove(first) ;
+			TO_multicast( m) ;
+			nextTimeToSend = Math.max(nextTimeToSend,pClock.value().value())+0.5;
+		}
+	}
+	
+	boolean canDispatch() {
+		return nextTimeToSend < pClock.value().value();
+	}
+	
 	/**
 	 * Initializes this process.
 	 * 
@@ -36,9 +62,14 @@ public class Process extends Middleware implements ProcessMessageHandler {
 	 */
 	public void exec() {
 		new StateDisplay() ;
+
+		dispatchTask = new Task(0.2) {
+			public void run() {
+				dispatchQ();
+				this.reSchedule(1 * rg.nextDouble() ) ;
+			}
+		};
 		
-
-
 		docTask = new Task( 20*rg.nextDouble() )  {
 			public void run() {
 				submitAreaOperation() ;
@@ -54,17 +85,16 @@ public class Process extends Middleware implements ProcessMessageHandler {
 	private void submitAreaOperation() {
 		char op = OpGenerator.generate() ;
 		Shape shape = ShapeGenerator.generate() ;
-		TO_multicast( new ShapeOperation( op, shape) ) ;		
-		
+		messageQueue.put( pClock.value().value(),new ShapeOperation( op, shape) ) ;		
 	}
-	
+
 	public void onReceive(EndPoint src, ChangeColor m) {
 		stateColor = m.color ;
 	}
-	
+
 	public void onReceive(EndPoint src, ShapeOperation m) {
 		Area area = new Area( m.shape ) ;
-		
+
 		switch( m.op ) {
 		case '+' :
 			state.add( area ) ;
@@ -81,20 +111,24 @@ public class Process extends Middleware implements ProcessMessageHandler {
 		/*
 		 * Randomly generate a new operation in response to an incoming operation.
 		 */
-		if( rg.nextDouble() < 0.04 ) {
-			this.submitAreaOperation() ;
-		}	
 		
-		/*
-		 * If the state becomes an empty area, update the background color.
-		 */
-		if( ! state.isEmpty() ) {		
-			Color newColor = Color.getHSBColor( rg.nextFloat(), 0.3f + 0.3f * rg.nextFloat(), 0.9f) ;	
-			TO_multicast( new ChangeColor( newColor ) ) ;
-		}		
+			if( rg.nextDouble() < 0.04 ) {
+				
+				this.submitAreaOperation() ;
+			}	
+
+			/*
+			 * If the state becomes an empty area, update the background color.
+			 */
+			if( ! state.isEmpty() ) {	
+				Color newColor = Color.getHSBColor( rg.nextFloat(), 0.3f + 0.3f * rg.nextFloat(), 0.9f) ;	
+				messageQueue.put( pClock.value().value(), new ChangeColor( newColor ) ) ;
+
+			}	
+
 	}
-	
-	
+
+
 	/**
 	 * This class is used to display the state of this process in its own window.
 	 * @author Sérgio Duarte
@@ -104,7 +138,7 @@ public class Process extends Middleware implements ProcessMessageHandler {
 
 		StateDisplay() {
 			Gui.addDisplayable( this.toString(), this, 5.0) ;
-			
+
 			int s = (int) Math.sqrt( ProcessDB.size() ) ;			
 			int i = index / s, j = index % s ;
 			XY size = new XY(650/s, 650/s) ;
@@ -112,18 +146,18 @@ public class Process extends Middleware implements ProcessMessageHandler {
 			Gui.setFrameRectangle( this.toString(), corner.X(), corner.Y(), size.X(), size.Y()) ;
 			Gui.setFrameTransform( this.toString(), 1000, 1000, 0, true) ;
 		}
-		
+
 		public void display(Graphics2D gu, Graphics2D gs) {
 			gs.setBackground(bkgColor) ;
 			gs.clearRect(0, 0, 1000, 1000) ;
-			
+
 			gs.setStroke( new BasicStroke(30.0f)) ;
 			gs.setColor( stateColor.darker() ) ;
 			gs.draw( state ) ;
 			gs.setColor( stateColor ) ;
 			gs.fill( state ) ;
 		}
-		
+
 		public String toString() {
 			return "Process:" + index ;
 		}
