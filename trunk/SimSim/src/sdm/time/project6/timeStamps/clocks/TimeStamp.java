@@ -14,4 +14,6 @@ public interface TimeStamp extends Comparable<TimeStamp>, Serializable {
 	boolean concurrent( TimeStamp other ) ;
 	
 	double value() ;
+	
+	void delay(double incValue) ;
 }
