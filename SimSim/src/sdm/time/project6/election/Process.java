@@ -1,4 +1,4 @@
-package sdm.time.project6.tco;
+package sdm.time.project6.election;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -6,7 +6,7 @@ import java.awt.geom.*;
 import simsim.core.*;
 import simsim.utils.*;
 import simsim.gui.geom.*;
-import sdm.time.project6.tco.msgs.*;
+import sdm.time.project6.election.msgs.*;
 import static simsim.core.Simulation.*;
 
 

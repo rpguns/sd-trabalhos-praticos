@@ -1,4 +1,4 @@
-package sdm.time.project6.tco.msgs;
+package sdm.time.project6.election.msgs;
 
 import java.awt.* ;
 

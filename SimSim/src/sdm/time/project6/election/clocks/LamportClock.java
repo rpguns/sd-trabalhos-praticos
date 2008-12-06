@@ -1,4 +1,4 @@
-package sdm.time.project6.tco.clocks;
+package sdm.time.project6.election.clocks;
 
 public class LamportClock extends AbstractClock {
 	

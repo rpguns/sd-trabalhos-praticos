@@ -1,15 +1,17 @@
-package sdm.time.project6.tco.msgs;
+package sdm.time.project6.election.msgs;
 
 import simsim.core.*; 
 
 @SuppressWarnings("serial")
-public class TotalOrderMulticast extends Message {
+public class FifoOrderMulticast extends Message {
 
+	public int seq ;
 	public EndPoint src ;
 	public Message payload ;
 	
-	public TotalOrderMulticast( EndPoint src, Message p ) {
+	public FifoOrderMulticast( int seq, EndPoint src, Message p ) {
 		super( true, p.color ) ;
+		this.seq = seq ;
 		this.payload = p ;
 	}
 	
