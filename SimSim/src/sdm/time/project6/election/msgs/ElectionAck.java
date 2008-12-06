@@ -4,13 +4,14 @@ import simsim.core.*;
 import java.awt.*;
 
 @SuppressWarnings("serial")
-public class Coordinator extends Message {
-
+public class ElectionAck extends Message {
 	
-	public Coordinator() {
-		super( false, Color.RED) ;
+	public ElectionAck() {
+		super() ;
+
 	}
 	
+
 	/* (non-Javadoc)
 	 * <b>IMPORTANT!!!</b> Include a copy of this method in every class that extends Message
 	 * @see sim.core.Message#deliverTo(sim.net.EndPoint, sim.core.MessageHandler)
