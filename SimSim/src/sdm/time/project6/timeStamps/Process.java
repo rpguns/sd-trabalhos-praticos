@@ -21,9 +21,10 @@ public class Process extends Middleware implements ProcessMessageHandler {
 	Color stateColor, bkgColor ;
 
 	Task docTask ;
-	
-	TreeMap<Double,Message> messageQueue = new TreeMap<Double,Message>();
+	Task dispatchTask ;
 	double nextTimeToSend = pClock.value().value();
+	TreeMap<Double,Message> messageQueue = new TreeMap<Double,Message>();
+	
 	double lastSendingTime = pClock.value().value();
 
 	public Process() {
@@ -33,16 +34,20 @@ public class Process extends Middleware implements ProcessMessageHandler {
 		stateColor = Color.gray ;
 		state = new Area( new Circle( 500, 500, 500 ) ) ;
 	}
+	
+	
 
 	public void dispatchQ() {
+		
+		
 		double first;
-		System.out.println("Hai?");
+		System.out.println("Hai? "+nextTimeToSend+" @ "+pClock.value().value());
 		while( !messageQueue.isEmpty() && canDispatch()) {
 			first = messageQueue.firstKey();
 			System.out.println("Dispatching...");
 			Message m = messageQueue.remove(first) ;
 			FO_multicast( m) ;
-			nextTimeToSend += 1;
+			nextTimeToSend = Math.max(nextTimeToSend,pClock.value().value())+0.5;
 		}
 	}
 	
@@ -58,11 +63,17 @@ public class Process extends Middleware implements ProcessMessageHandler {
 	public void exec() {
 		new StateDisplay() ;
 
+		dispatchTask = new Task(0.2) {
+			public void run() {
+				dispatchQ();
+				this.reSchedule(1 * rg.nextDouble() ) ;
+			}
+		};
+		
 		docTask = new Task( 20*rg.nextDouble() )  {
 			public void run() {
 				submitAreaOperation() ;
 				this.reSchedule( 60 + 80 * rg.nextDouble() ) ;
-				dispatchQ();
 			}
 		};
 	}
@@ -114,7 +125,6 @@ public class Process extends Middleware implements ProcessMessageHandler {
 				messageQueue.put( pClock.value().value(), new ChangeColor( newColor ) ) ;
 
 			}	
-			dispatchQ();
 
 	}
 
