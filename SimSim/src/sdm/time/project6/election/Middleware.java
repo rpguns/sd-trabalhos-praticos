@@ -7,6 +7,7 @@ import sdm.time.project6.election.msgs.*;
 
 public class Middleware extends Node implements MiddlewareMessageHandler {
 	
+	double myID;
 	int myFifo_SeqN = 0 ;
 	Map<EndPoint, FifoQueue> fifoQueues = new HashMap<EndPoint, FifoQueue>() ;
 	
@@ -34,6 +35,13 @@ public class Middleware extends Node implements MiddlewareMessageHandler {
 		srcQueue.dispatch() ;
 	}
 	
+	public void onReceive(EndPoint src, Election m) {
+		//TODO
+	}
+	
+	public void onReceive(EndPoint src, Coordinator m) {
+		//TODO
+	}
 	
 	private FifoQueue fifoQueue( EndPoint src ) {
 		FifoQueue queue = fifoQueues.get( src ) ;
