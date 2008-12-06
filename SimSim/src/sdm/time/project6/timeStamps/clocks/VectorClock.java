@@ -65,6 +65,10 @@ public class VectorClock extends AbstractClock {
 			return true ;
 		}
 		
+		public void delay(double incValue) {
+			//thumbleweed rolls by
+		}
+		
 		private boolean equals( TS other ) {
 			for( int i = 0 ; i < values.length ; i++ )
 				if( values[i] != other.values[i] )	return false ;					

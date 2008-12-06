@@ -60,6 +60,10 @@ public class LamportClock extends AbstractClock {
 			return 0;
 		}
 		
+		public void delay(double incValue) {
+			//thumbleweed rolls by
+		}
+		
 		public String toString() {
 			return "" + value ;
 		}

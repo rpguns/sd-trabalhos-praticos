@@ -29,7 +29,7 @@ public class PhysicalClock extends AbstractClock {
 	
 	@SuppressWarnings("serial")
 	static class TS implements TimeStamp {
-		final double value ;
+		double value ;
 		
 		TS( double v, int i ) {
 			value = v ;
@@ -53,6 +53,10 @@ public class PhysicalClock extends AbstractClock {
 		
 		public  double value() {
 			return value;
+		}
+		
+		public void delay(double incValue) {
+			this.value += incValue;
 		}
 
 		public String toString() {

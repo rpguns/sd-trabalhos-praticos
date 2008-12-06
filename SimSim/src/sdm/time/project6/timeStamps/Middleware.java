@@ -8,11 +8,11 @@ import sdm.time.project6.timeStamps.clocks.*;
 
 public class Middleware extends Node implements MiddlewareMessageHandler {
 	
-	int myFifo_SeqN = 0 ;
+	
 	//Map<EndPoint, FifoQueue> fifoQueues = new HashMap<EndPoint, FifoQueue>() ;
 	FifoQueue queueQueue = new FifoQueue() ;
 	PhysicalClock pClock = new PhysicalClock(this);
-	
+	double nextSendingTime = pClock.value().value() ;
 	
 	protected void R_multicast( final Message m ) {
 		endpoint.broadcast( m ) ;		
@@ -20,7 +20,12 @@ public class Middleware extends Node implements MiddlewareMessageHandler {
 	
 	protected void FO_multicast( final Message m ) {
 		//endpoint.broadcast( new FifoOrderMulticast( myFifo_SeqN++, endpoint, m ) ) ;
-		endpoint.broadcast( new FifoOrderMulticast( pClock.value(), endpoint, m ) ) ;
+		TimeStamp t = pClock.value();
+		//t.delay(0.2);
+		
+		endpoint.broadcast( new FifoOrderMulticast( t , endpoint, m ) ) ;
+		
+			
 	}
 	
 	protected void TO_multicast( final Message m ) {
@@ -38,20 +43,32 @@ public class Middleware extends Node implements MiddlewareMessageHandler {
 		srcQueue.dispatch() ;
 	}
 	
-	
 	private FifoQueue fifoQueue( EndPoint src ) {
-
+//		FifoQueue queue = fifoQueues.get( src ) ;
+//		if( queue == null ) {
+//			queue = new FifoQueue() ;
+//			fifoQueues.put( src, queue) ;
+//		}
 		return queueQueue ;
 	}
 	
 	@SuppressWarnings("serial")
 	class FifoQueue extends TreeMap<Double, FifoOrderMulticast> {
 		void dispatch() {
-			while( ! isEmpty()) {
-				FifoOrderMulticast m = remove(firstEntry().getKey()) ;
+			double first;
+			if (!isEmpty())
+				System.out.println("Attempting to dispatch message with time = "+firstEntry().getKey()+" at instant = "+pClock.value().value()+"...");
+			while( ! isEmpty() && canDispatch(first = firstEntry().getKey()) ) {
+				System.out.println("Message dispatched.");
+				FifoOrderMulticast m = remove(first) ;
 				m.payload.deliverTo( m.src, Middleware.this) ;
 			}
 		}
+		boolean canDispatch(double messageTime) {
+			return messageTime < pClock.value().value();
+		}
 	}
+	
+	
 }
 
