@@ -1,4 +1,4 @@
-package sdm.transactions.centralized;
+package sdm.transactions.project7;
 
 import java.awt.*;
 import java.util.*;
@@ -27,14 +27,14 @@ public class Main extends Simulation implements Displayable {
 		//Initialize the simulation nodes (includes servers and clients)
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
-		
+	/*	
 		new Task(100) {
 			public void run() {
 				ServerDB.randomServer().crash() ;
 				reSchedule( 10 + 5000 * rg.nextDouble() ) ;
 			}
 		} ;
-		
+		*/
 		super.setSimulationMaxTimeWarp( 50 ) ;
 
 		System.out.println("Init complete...") ;

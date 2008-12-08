@@ -1,4 +1,4 @@
-package sdm.transactions.centralized;
+package sdm.transactions.project7;
 
 import java.awt.Graphics2D;
 import java.util.Set;
@@ -15,7 +15,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	
 	public C_TransactionManager( AbstractServer owner ) {
 		super( owner, new PhysicalClock( owner ) ) ;
-		Naming.rebindServer("//" + owner.sid + "/tgo", this ) ; 		
+		Naming.rebindServer("//Server" + owner.sid + "/tgo", this ) ; 		
 	}
 
 	@Override
