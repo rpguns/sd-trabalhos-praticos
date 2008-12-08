@@ -37,7 +37,7 @@ public class Scheduler implements Displayable, Runnable {
 		threads = new ThreadsDisplay() ;
 		queue = new PriorityQueue<Task>() ;
 	}
-
+	
 	/**
 	 * Stops the simulator, preventing further tasks to be executed...
 	 */
@@ -185,9 +185,9 @@ public class Scheduler implements Displayable, Runnable {
 	 * The simulation uses additional threads for the GUI, but all the drawing is actually
 	 * done to a back buffer image by the scheduler thread currently running. 
 	 * 
-	 * This manager is required to implement blocking network operations. When a blocking write operation is
+	 * This manager is required to implement blocking network operations. When a blocking io operation is
 	 * performed within a task, the current (scheduler) thread is blocked until the following read is ready, in the mean
-	 * time, the scheduler picks a previously block thread to continue execution or picks other tasks for execution.
+	 * time, the scheduler picks a previously blocked thread to continue execution or picks other tasks for execution.
 	 * 
 	 * @author  Sérgio Duarte (smd@di.fct.unl.pt)
 	 *

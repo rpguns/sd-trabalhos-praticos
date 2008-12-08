@@ -115,7 +115,7 @@ public class EndPoint {
 		else if( dst.isMulticastEndPoint )
 			dst.handler.onReceive(this, m) ;
 		else {
-			double delay = dst.latency( this ) * (1 + Network.JITTER * rg.nextDouble() ) ;
+			double delay = dst.latency( this ) * ( 1 + Network.JITTER * rg.nextDouble() ) ;
 			new UdpPacket( this, dst, m, delay );
 		}
 		return true;

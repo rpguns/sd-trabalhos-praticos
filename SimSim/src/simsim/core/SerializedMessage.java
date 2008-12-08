@@ -13,15 +13,14 @@ import java.io.* ;
  *
  */
 @SuppressWarnings("serial")
-abstract public class SerializedMessage extends Message implements Serializable {
+abstract public class SerializedMessage extends Message {
 	
 	protected SerializedMessage() {
 		this( false, Color.gray ) ;
 	}
 	
 	protected SerializedMessage( boolean visible, Color color ) {
-		this.color = color ;
-		this.visible = visible ;
+		super( visible, color ) ;
 	}
 	
 	public EncodedMessage encode() {

@@ -1,6 +1,8 @@
 package simsim.core;
 
+import java.io.*;
 import java.awt.*;
+
 import simsim.gui.geom.*;
 
 
@@ -11,10 +13,10 @@ import simsim.gui.geom.*;
  * @author Sérgio Duarte (smd@di.fct.unl.pt)
  */
 
-abstract public class Message implements EncodedMessage {
+@SuppressWarnings("serial")
+abstract public class Message implements EncodedMessage, Serializable {	
 	
-	protected boolean visible ;
-	
+	protected boolean visible ;	
 	public Color color = Color.DARK_GRAY ;
 
 	/**

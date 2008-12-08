@@ -81,17 +81,15 @@ public class UnicastRemoteObject implements MessageHandler {
 		}
 	}
 
-    //Receives the invocation details and calls the appropriate method on the stub.
-    public void onReceive(TcpChannel chn, RmiInvocation m) {
-            try {
-                    Object res = m.method.invoke( this, m.args) ;
-                    chn.tcpReply( new RmiReply( res ) ) ;
-            } catch (InvocationTargetException e) {
-                    chn.tcpReply(( new RmiReply( e.getCause() ))) ;
-            } catch (Exception e) {
-                    chn.tcpReply(( new RmiReply( e ))) ;
-            }
-    }
+	//Receives the invocation details and calls the appropriate method on the stub.
+	public void onReceive(TcpChannel chn, RmiInvocation m) {
+		try {
+			Object res = m.method.invoke( this, m.args) ;
+			chn.tcpReply( new RmiReply( res ) ) ;
+		} catch (Exception e) {
+			chn.tcpReply(( new RmiReply( e ))) ;
+		}
+	}
 
 	public void onReceive(EndPoint src, Message m) {
 		Thread.dumpStack() ;
