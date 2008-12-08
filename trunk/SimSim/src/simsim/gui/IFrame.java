@@ -21,7 +21,7 @@ class IFrame extends JInternalFrame {
 		this.setClosable(true);
 		this.setResizable(true);
 		this.setMaximizable(true);
-		panel.setPreferredSize( new Dimension(640, 1)) ;
+		panel.setPreferredSize( new Dimension(640, 640)) ;
 				
 		this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 		getContentPane().setLayout(new javax.swing.BoxLayout( getContentPane(), javax.swing.BoxLayout.LINE_AXIS));

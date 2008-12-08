@@ -9,6 +9,7 @@ import simsim.core.* ;
  * An internal class of the SimSim RMI/RPC package that is used to encode the invocation data associated with a RMI/RPC call to a remote object.
  * @author Sérgio Duarte (smd@di.fct.unl.pt)
  */
+@SuppressWarnings("serial")
 class RmiInvocation extends Message {
 	
 	Method method ;

@@ -9,6 +9,7 @@ import simsim.core.* ;
  * @author Sérgio Duarte (smd@di.fct.unl.pt)
  *
  */
+@SuppressWarnings("serial")
 class RmiReply extends Message {
 	Object reply ;
 	

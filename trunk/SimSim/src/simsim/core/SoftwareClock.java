@@ -58,8 +58,8 @@ public class SoftwareClock implements Displayable {
 	 * @return The time as measured by this clock, already taking into account any adjustments made.
 	 */
 	public double currentTime() {
-		T0 += 1e-9 ; 
-		return Math.max(T0, T()) ;  //Ensures time advances at least 1 nanosecond every time the clock is read
+		T0 = Math.max(T0 + 1e-9, T()) ;  //Ensures time advances at least 1 nanosecond every time the clock is read
+		return T0 ;
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public class SoftwareClock implements Displayable {
 		if( ! isMasterClock ) {
 			D = d ;
 			H0 = H() + W ;
-			cat.reSchedule(1) ;
+			cat.run() ;
 		}
 	}
 	
@@ -116,6 +116,8 @@ public class SoftwareClock implements Displayable {
 			double newDrift = 1 + D / Math.max( W/2, H0 - H() ) ; 
 			skew += (drift - newDrift ) * H() ;
 			drift = newDrift ;
+			
+			cat.reSchedule(1) ;
 		}
 	}
 
@@ -126,7 +128,7 @@ public class SoftwareClock implements Displayable {
 		
 		XY a = new XY( xy.x-10, xy.y + SCALE * D) ;
 		XY b = new XY( xy.x +0, xy.y + SCALE * (t - t0 )) ;
-		XY c = new XY( xy.x+10, xy.y + SCALE * (drift - 1)) ;
+		XY c = new XY( xy.x+10, xy.y + 100*SCALE * (drift - 1)) ;
 		
 		gs.setColor( Color.orange) ;
 		gs.setStroke( new BasicStroke(5.0f)) ;

@@ -132,8 +132,6 @@ public class Task implements Comparable<Task>, Displayable {
     void reSchedule() {
     }
     
-    
-    
     public int hashCode() {
     	return seqN ;
     }
@@ -155,7 +153,7 @@ public class Task implements Comparable<Task>, Displayable {
     public String toString() {
         return String.format("%d / %s / %s [%s, %s]", seqN, (owner == null ? "" : "" + owner.toString()), getClass(), isQueued, reScheduled) ;
     }
-        
+          
     public void display( Graphics2D gu, Graphics2D gs) {}
 }
 
