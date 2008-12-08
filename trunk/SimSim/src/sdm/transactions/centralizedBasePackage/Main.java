@@ -5,6 +5,7 @@ import java.util.*;
 
 import sdm.transactions.common.*;
 import simsim.core.*;
+import simsim.ext.charts.XYLineChart;
 
 public class Main extends Simulation implements Displayable {
 	
@@ -16,8 +17,12 @@ public class Main extends Simulation implements Displayable {
 	}
 
 	Main init() {
+		final XYLineChart chart = new XYLineChart("Transaction success percentage", 5.0, "transaction success (%)", "time(s)") ;
+		chart.setSeriesLinesAndShapes("s0", true, false) ;
+		
 		Gui.setFrameRectangle("MainFrame", 0, 0, 480, 480);		
-
+		Gui.setFrameRectangle("Transaction success percentage", 484, 0, 480, 480) ;
+		
 		for( int i = 0 ; i < TOTAL_SERVERS ; i++ )
 			new Server() ;
 		
@@ -27,14 +32,25 @@ public class Main extends Simulation implements Displayable {
 		//Initialize the simulation nodes (includes servers and clients)
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
-	/*	
+		
 		new Task(100) {
 			public void run() {
 				ServerDB.randomServer().crash() ;
 				reSchedule( 10 + 5000 * rg.nextDouble() ) ;
 			}
 		} ;
-		*/
+		
+		//Graph Drawing
+		new PeriodicTask( 30, 5) {
+			public void run() {
+				//Only one server active so this obviously works
+				Server standaloneServer = (Server)ServerDB.randomServer();
+				double successRatio = 
+					standaloneServer.numberOfCommitedTransactions/standaloneServer.numberOfClosedTransactions;
+				chart.getSeries("s0").add( currentTime(), 100*successRatio ) ;
+			}
+		};
+		
 		super.setSimulationMaxTimeWarp( 50 ) ;
 
 		System.out.println("Init complete...") ;

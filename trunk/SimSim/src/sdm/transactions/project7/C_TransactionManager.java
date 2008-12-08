@@ -13,6 +13,8 @@ import static sdm.transactions.common.transaction.Transaction.Result.*;
 
 public class C_TransactionManager extends AbstractTransactionManager implements TransactionalGridOperations {
 	
+	
+	
 	public C_TransactionManager( AbstractServer owner ) {
 		super( owner, new PhysicalClock( owner ) ) ;
 		Naming.rebindServer("//Server" + owner.sid + "/tgo", this ) ; 		
@@ -37,9 +39,10 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 		if( t != null ) {
 			Result res = transactions().isEmpty() ? COMMIT : ABORT ;
 			System.out.println("Total Concurrent Transactions: " + transactions() ) ;
-			if( res == COMMIT ) t.commitChanges() ;
+			if( res == COMMIT ) {  t.commitChanges() ; ((Server)owner).numberOfCommitedTransactions++; }
 			super.saveTID() ;
 			SafeStorage.save( owner, "grid", owner.grid ) ;
+			((Server)owner).numberOfClosedTransactions++;
 			return res ;
 		}
 		else return ERROR ;
