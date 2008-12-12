@@ -3,7 +3,7 @@ package sdm.transactions.project7;
 import simsim.ext.rmi.*;
 import java.util.*;
 
-public class ClientMiddleware extends UnicastRemoteObject {
+public class ClientMiddleware extends UnicastRemoteObject implements RemoteClient {
 
 	public HashSet<Long> activeTransactions;
 	
@@ -20,6 +20,9 @@ public class ClientMiddleware extends UnicastRemoteObject {
 		activeTransactions.add(tid);
 	}
 	
+	/* (non-Javadoc)
+	 * @see sdm.transactions.project7.RemoteClient#isActive(long)
+	 */
 	public boolean isActive(long tid) {
 		return activeTransactions.contains(tid);
 	}

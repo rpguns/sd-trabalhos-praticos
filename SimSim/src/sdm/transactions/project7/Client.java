@@ -12,10 +12,13 @@ import sdm.transactions.common.grid.*;
 import static simsim.core.Simulation.*;
 import static sdm.transactions.common.transaction.Transaction.*;
 
-public class Client extends Node implements RemoteClient {
+public class Client extends Node {
 
+	public ClientMiddleware myRemoteInterface;
+	
 	public Client() {
 		super(Color.green);
+		myRemoteInterface = new ClientMiddleware(this);
 	}
 
 	protected long tid = -1;
@@ -41,7 +44,8 @@ public class Client extends Node implements RemoteClient {
 	void doCentralizedBlank() {
 		TransactionalGridOperations tgo = Naming.lookupServer(endpoint(0), "//Server" + rg.nextInt(ServerDB.size()) + "/tgo");
 		
-		long tid = tgo.openTransaction(endpoint);
+		long tid = tgo.openTransaction(myRemoteInterface);
+		myRemoteInterface.addTransaction(tid);
 
 		int[] gs = tgo.gridSize(tid);
 
@@ -54,12 +58,14 @@ public class Client extends Node implements RemoteClient {
 		Result res = tgo.closeTransaction(tid);
 
 		System.out.println("Exit: doBlank: " + res);
+		myRemoteInterface.removeTransaction(tid);
 	}
 
 	void doCentralizedCircle() {
 		TransactionalGridOperations tgo = Naming.lookupServer(endpoint(0), "//Server" + rg.nextInt(ServerDB.size()) + "/tgo");
 
-		tid = tgo.openTransaction(endpoint);
+		tid = tgo.openTransaction(myRemoteInterface);
+		myRemoteInterface.addTransaction(tid);
 
 		int[] gs = tgo.gridSize(tid);
 
@@ -84,6 +90,7 @@ public class Client extends Node implements RemoteClient {
 		Result res = tgo.closeTransaction(tid);
 		tid = -1;
 		System.out.println("Exit: doCentralizedCircle: " + res);
+		myRemoteInterface.removeTransaction(tid);
 	}
 
 	/**

@@ -1,4 +1,5 @@
 package sdm.transactions.common.transaction;
+import sdm.transactions.project7.*;
 
 import java.util.*;
 
@@ -28,7 +29,7 @@ abstract public class AbstractTransactionManager extends UnicastRemoteObject imp
 	
 	protected abstract AbstractTransaction createTransaction(long tid, TimeStamp timeStamp);
 
-	public long openTransaction(EndPoint src) {
+	public long openTransaction(RemoteClient c) {
 		throw new RuntimeException("Not implemented...");
 	}
 
