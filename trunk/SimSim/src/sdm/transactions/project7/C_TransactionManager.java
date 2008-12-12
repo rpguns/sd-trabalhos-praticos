@@ -13,7 +13,8 @@ import static sdm.transactions.common.transaction.Transaction.Result.*;
 
 public class C_TransactionManager extends AbstractTransactionManager implements TransactionalGridOperations {
 	
-	
+	protected HashMap< Long,List< Pair<Set<String>,Set<String> > > > transactionCollisionSets = 
+		new HashMap< Long,List< Pair< Set<String>,Set<String> > > >(100);
 	
 	public C_TransactionManager( AbstractServer owner ) {
 		super( owner, new PhysicalClock( owner ) ) ;
@@ -28,33 +29,40 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	public long openTransaction() {
 		C_TentativeGridTransaction t = new C_TentativeGridTransaction( tidCounter++, clock.increment().value(), owner.grid ) ;
 		transactions.put( t.tid(), t ) ;
+		
+		//Adquire uma nova cache de transaccoes commited entre tempo de chegada e tempo de saída
+		transactionCollisionSets.put(t.tid(), new LinkedList<Pair<Set<String>,Set<String>>>());
 		System.err.println("BEGIN:" + t.tid() ) ;
 		return t.tid() ;
 	} 
 	
-	
-	private boolean conflict (C_TentativeGridTransaction first, C_TentativeGridTransaction second) {
-		Set<String> firstReadSet = first.readSet;
-		Set<String> firstWriteSet = first.writeSet;
+	protected void updateColisions(C_TentativeGridTransaction commitedTransaction) {
 		
-		Set<String> secondReadSet = second.readSet;
-		Set<String> secondWriteSet = second.writeSet;
+		Pair<Set<String>,Set<String>> possibleConflicts = 
+			new Pair<Set<String>,Set<String>>(commitedTransaction.readSet,commitedTransaction.writeSet);
 		
-		for (String x:firstWriteSet) {
-			for (String y:secondWriteSet)
-			if (x.compareTo(y) == 0)
-				return false;
+		for (AbstractTransaction t : transactions.values()) {
+			C_TentativeGridTransaction taux = (C_TentativeGridTransaction) t;
+			List<Pair<Set<String>,Set<String>>> collisionSet = transactionCollisionSets.get(taux.tid());
+			collisionSet.add(possibleConflicts);
 		}
 		
-		for (String x:firstReadSet) {
-			for (String y:secondWriteSet)
-			if (x.subSequence(arg0, arg1)y) == 0)
-				return false;
-		}
-			
-		
-		return true;
 	}
+	protected boolean collisionsExistWith(C_TentativeGridTransaction t) {
+		
+		//Retrieves the collision list for the given transaction
+		List<Pair<Set<String>,Set<String>>> tCollisionSet = 
+			transactionCollisionSets.get(t.tid());
+		
+		//Iterates over the previously committed transactions and checks for conflicts
+		for (Pair<Set<String>,Set<String>> currentPair : tCollisionSet) {
+			if (t.hasConflictWith(currentPair.getFirst(), currentPair.getFirst())) 
+				return true;
+		}
+		
+		return false;
+	}
+	
 	// ERROR indicates that we are attempting to close a transaction
 	// that this server does not know about...
 	public Result closeTransaction( long tid) {
@@ -66,15 +74,19 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 				
 			SortedSet<C_TentativeGridTransaction> currentTrans = this.transactions();
 			
-			for (C_TentativeGridTransaction x:currentTrans)
-				if (conflict(t,x))
-					res = ABORT;
+			if (collisionsExistWith(t))
+				res = ABORT;
 			
 			System.out.println("Total Concurrent Transactions: " + transactions() ) ;
+
 			if( res == COMMIT ) { 
 				t.commitChanges() ; 
+				updateColisions(t) ;
+				
+				//Estatística
 				((Server)owner).numberOfCommitedTransactions++; 
 				}
+
 			super.saveTID() ;
 			SafeStorage.save( owner, "grid", owner.grid ) ;
 			((Server)owner).numberOfClosedTransactions++;
