@@ -66,6 +66,13 @@ public class C_TentativeGridTransaction extends AbstractTransaction implements G
 	public int[] gridSize(long tid) {
 		return committed.gridSize(tid);
 	}
+	
+	public boolean accessSamePosition(String op1, String op2) {
+		String[] op1coords = (op1.substring(2,op1.length()-1)).split(" ");
+		String[] op2coords = (op2.substring(2,op1.length()-1)).split(" ");
+		return Integer.valueOf(op1coords[0]).equals(Integer.valueOf(op2coords[0])) &&
+			Integer.valueOf(op1coords[1]).equals(Integer.valueOf(op2coords[1]));
+	}
 
 	public boolean hasConflictWith(Set<String> otherReadSet, Set<String> otherWriteSet) {
 
@@ -75,13 +82,14 @@ public class C_TentativeGridTransaction extends AbstractTransaction implements G
 				if (x.equals(y))
 					return true;
 		}
-/*
+
+		//Read-type conflicts
 		for (String x:readSet) {
-			for (String y:secondWriteSet)
-				if (x.subSequence(arg0, arg1)y) == 0)
-				return true;
+			for (String y:otherWriteSet)
+				if (x.equals(y))
+					return true;
 		}
-*/
+
 
 		return false;
 	}
