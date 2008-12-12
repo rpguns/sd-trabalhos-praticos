@@ -38,7 +38,7 @@ public class Client extends Node {
 	void doCentralizedBlank() {
 		TransactionalGridOperations tgo = Naming.lookupServer(endpoint(0), "//Server" + rg.nextInt(ServerDB.size()) + "/tgo");
 
-		long tid = tgo.openTransaction(endpoint);
+		long tid = tgo.openTransaction(null);
 
 		int[] gs = tgo.gridSize(tid);
 
@@ -56,7 +56,7 @@ public class Client extends Node {
 	void doCentralizedCircle() {
 		TransactionalGridOperations tgo = Naming.lookupServer(endpoint(0), "//Server" + rg.nextInt(ServerDB.size()) + "/tgo");
 
-		long tid = tgo.openTransaction(endpoint);
+		long tid = tgo.openTransaction(null);
 
 		int[] gs = tgo.gridSize(tid);
 

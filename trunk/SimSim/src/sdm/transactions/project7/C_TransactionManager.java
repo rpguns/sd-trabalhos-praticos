@@ -18,9 +18,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	protected HashMap< Long,List< Pair<Set<String>,Set<String> > > > transactionCollisionSets = 
 		new HashMap< Long,List< Pair< Set<String>,Set<String> > > >(100);
 
-	protected Map<Long,EndPoint> transactionClients = new TreeMap<Long,EndPoint>();
-	protected Map<Task,Long> toDropTasks = new TreeMap<Task,Long>();
-	protected Map<Long,Task> toDropTids = new TreeMap<Long,Task>();
+	protected Map<Long,RemoteClient> transactionClients = new TreeMap<Long,RemoteClient>();
 
 	public C_TransactionManager( AbstractServer owner ) {
 		super( owner, new PhysicalClock( owner ) ) ;
@@ -33,29 +31,11 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	}
 
 	public void abortTransaction(long tid) {
-		((Server)owner).sendPing(transactionClients.get(tid),new PingClient(tid));
-		Task droppingTask = new Task(25.0) {
-			public void run() {
-				System.out.println(toDropTasks);
-				if (toDropTasks.get(this) != null) {
-					long tid1 = toDropTasks.get(this);
-					remove(tid1);
-					toDropTasks.remove(this);
-					toDropTids.remove(tid1);
-					transactionClients.remove(tid1);
-				}
-			}
-		};
-		toDropTids.put(tid,droppingTask);
-		toDropTasks.put(droppingTask,tid);
-		System.err.println("$$$$$$$$$$$$$$$$$\nTransaction aborted\n$$$$$$$$$$$$$$$$$");
-	}
-
-	protected void handleResponse(long tid) {
-		Task t = toDropTids.get(tid);
-		toDropTasks.remove(t);
-		toDropTids.remove(tid);
-		System.err.println("$$$$$$$$$$$$$$$$$\nTransaction still running\n$$$$$$$$$$$$$$$$$");
+		RemoteClient tClient = transactionClients.get(tid);
+		if (!tClient.isActive(tid)) {
+			System.err.println("$$$$$$$$$$$$$$$$$\nTransaction aborted\n$$$$$$$$$$$$$$$$$");
+			super.remove(tid);
+		}
 	}
 
 	public EndPoint retrieveServerEndpoint() {
@@ -71,7 +51,6 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 
 			if (currentTime - initialTime > 25) {
 				this.abortTransaction(taux.tid());
-				System.err.println("$$$$$$$$$$$$$$$$$\nAborting transaction with time "+initialTime+" at "+currentTime+"\n$$$$$$$$$$$$$$$$$");
 			}
 			else {
 				break;
@@ -79,10 +58,10 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 		}
 	}
 
-	public long openTransaction(EndPoint src) {
+	public long openTransaction(RemoteClient c) {
 		C_TentativeGridTransaction t = new C_TentativeGridTransaction( tidCounter++, clock.increment().value(), owner.grid ) ;
 		transactions.put( t.tid(), t ) ;
-		this.transactionClients.put(t.tid(), src);
+		this.transactionClients.put(t.tid(), c);
 
 		//Adquire uma nova cache de transaccoes commited entre tempo de chegada e tempo de saída
 		transactionCollisionSets.put(t.tid(), new LinkedList<Pair<Set<String>,Set<String>>>());
