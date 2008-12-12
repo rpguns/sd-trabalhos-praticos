@@ -66,7 +66,7 @@ abstract public class AbstractTransactionManager extends UnicastRemoteObject imp
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> SortedSet<T> transactions() {
+	public <T> SortedSet<T> transactions() {
 		SortedSet<T> res = new TreeSet<T>();
 		for (AbstractTransaction i : transactions.values())
 			res.add((T) i);

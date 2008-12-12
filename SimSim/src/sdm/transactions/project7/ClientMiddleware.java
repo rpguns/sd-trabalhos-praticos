@@ -6,9 +6,11 @@ import java.util.*;
 public class ClientMiddleware extends UnicastRemoteObject implements RemoteClient {
 
 	public HashSet<Long> activeTransactions;
+	public Client owner;
 	
 	public ClientMiddleware(Client owner) {
 		super(owner.address);
+		this.owner = owner;
 		activeTransactions = new HashSet<Long>(100);
 	}
 	
@@ -16,8 +18,18 @@ public class ClientMiddleware extends UnicastRemoteObject implements RemoteClien
 		activeTransactions.remove(tid);
 	}
 	
+	public void clear() {
+		activeTransactions = new HashSet<Long>(100);
+	}
+	
 	public void addTransaction(long tid) {
 		activeTransactions.add(tid);
+	}
+	
+	public void crashThyOwner() {
+		owner.putOffline();
+		this.clear();
+		System.err.println("Turned off the node "+owner.address);
 	}
 	
 	/* (non-Javadoc)

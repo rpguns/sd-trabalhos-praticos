@@ -121,6 +121,10 @@ public class Client extends Node {
 		return res;
 	}
 
+	public void crash() {
+		myRemoteInterface.clear();
+		this.dispose();
+	}
 
 	public String toString() {
 		return "Client " + key ;
