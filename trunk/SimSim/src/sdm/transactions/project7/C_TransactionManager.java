@@ -1,7 +1,7 @@
 package sdm.transactions.project7;
 
 import java.awt.Graphics2D;
-import java.util.Set;
+import java.util.*;
 
 import simsim.ext.rmi.*;
 import sdm.transactions.common.*;
@@ -32,14 +32,49 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 		return t.tid() ;
 	} 
 	
+	
+	private boolean conflict (C_TentativeGridTransaction first, C_TentativeGridTransaction second) {
+		Set<String> firstReadSet = first.readSet;
+		Set<String> firstWriteSet = first.writeSet;
+		
+		Set<String> secondReadSet = second.readSet;
+		Set<String> secondWriteSet = second.writeSet;
+		
+		for (String x:firstWriteSet) {
+			for (String y:secondWriteSet)
+			if (x.compareTo(y) == 0)
+				return false;
+		}
+		
+		for (String x:firstReadSet) {
+			for (String y:secondWriteSet)
+			if (x.subSequence(arg0, arg1)y) == 0)
+				return false;
+		}
+			
+		
+		return true;
+	}
 	// ERROR indicates that we are attempting to close a transaction
 	// that this server does not know about...
 	public Result closeTransaction( long tid) {
 		C_TentativeGridTransaction t = super.remove( tid ) ;
 		if( t != null ) {
-			Result res = transactions().isEmpty() ? COMMIT : ABORT ;
+			//Result res = transactions().isEmpty() ? COMMIT : ABORT ;
+			
+			Result res = COMMIT;
+				
+			SortedSet<C_TentativeGridTransaction> currentTrans = this.transactions();
+			
+			for (C_TentativeGridTransaction x:currentTrans)
+				if (conflict(t,x))
+					res = ABORT;
+			
 			System.out.println("Total Concurrent Transactions: " + transactions() ) ;
-			if( res == COMMIT ) {  t.commitChanges() ; ((Server)owner).numberOfCommitedTransactions++; }
+			if( res == COMMIT ) { 
+				t.commitChanges() ; 
+				((Server)owner).numberOfCommitedTransactions++; 
+				}
 			super.saveTID() ;
 			SafeStorage.save( owner, "grid", owner.grid ) ;
 			((Server)owner).numberOfClosedTransactions++;
@@ -85,7 +120,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 					if (t.updated(i, j))
 						k++;
 
-				owner.grid.display(i, j, gs, k, owner.isOffline());
+				//owner.grid.display(i, j, gs, k, owner.isOffline());
 				
 			}
 	}
