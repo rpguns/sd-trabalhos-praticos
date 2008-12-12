@@ -10,7 +10,7 @@ import simsim.ext.charts.XYLineChart;
 public class Main extends Simulation implements Displayable {
 	
 	public static final int TOTAL_SERVERS = 1 ; 
-	public static final int TOTAL_CLIENTS = 8 ;
+	public static final int TOTAL_CLIENTS = 3 ;
 
 	Main() { 
 		super( 20, EnumSet.of( DisplayFlags.SIMULATION, DisplayFlags.TIME, DisplayFlags.THREADS, DisplayFlags.NETWORK, DisplayFlags.TRAFFIC )) ;
@@ -32,13 +32,6 @@ public class Main extends Simulation implements Displayable {
 		//Initialize the simulation nodes (includes servers and clients)
 		for( Node i : NodeDB.nodes() ) 
 			i.init() ;
-		/*
-		new Task(100) {
-			public void run() {
-				ServerDB.randomServer().crash() ;
-				reSchedule( 10 + 5000 * rg.nextDouble() ) ;
-			}
-		} ;*/
 		
 		//Graph Drawing
 		new PeriodicTask( 30, 5) {

@@ -18,7 +18,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	protected HashMap< Long,List< Pair<Set<String>,Set<String> > > > transactionCollisionSets = 
 		new HashMap< Long,List< Pair< Set<String>,Set<String> > > >(100);
 
-	protected Map<Long,RemoteClient> transactionClients = new TreeMap<Long,RemoteClient>();
+	public Map<Long,RemoteClient> transactionClients = new TreeMap<Long,RemoteClient>();
 
 	public C_TransactionManager( AbstractServer owner ) {
 		super( owner, new PhysicalClock( owner ) ) ;
@@ -33,7 +33,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	public void abortTransaction(long tid) {
 		RemoteClient tClient = transactionClients.get(tid);
 		if (!tClient.isActive(tid)) {
-			System.err.println("$$$$$$$$$$$$$$$$$\nTransaction aborted\n$$$$$$$$$$$$$$$$$");
+			System.err.println("$$$$$\n$$$$$$\n$$$$$$\nTransaction aborted\n$$$$$\n$$$$$$\n$$$$$$");
 			super.remove(tid);
 		}
 	}
@@ -65,7 +65,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 
 		//Adquire uma nova cache de transaccoes commited entre tempo de chegada e tempo de saída
 		transactionCollisionSets.put(t.tid(), new LinkedList<Pair<Set<String>,Set<String>>>());
-		System.err.println("BEGIN:" + t.tid() ) ;
+		//System.err.println("BEGIN:" + t.tid() ) ;
 		return t.tid() ;
 	} 
 
@@ -130,6 +130,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 	}
 
 	private C_TentativeGridTransaction tentative( long tid ) {
+		System.err.println(transactionClients.get(tid).isActive(tid));
 		return super.get(tid) ;
 	}
 
