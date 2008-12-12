@@ -13,7 +13,7 @@ public class C_TentativeGridTransaction extends AbstractTransaction implements G
 	Grid committed; // a reference to the committed version of the grid...
 	Grid tentative; // the tentative version of the grid associated with this transaction...
 	boolean cUpdated[][], sUpdated[][]; // tells which grid cells were written to
-		
+
 	public C_TentativeGridTransaction(long tid, TimeStamp begin, Grid commited) {
 		super(tid, begin);
 		this.committed = commited;
@@ -67,6 +67,25 @@ public class C_TentativeGridTransaction extends AbstractTransaction implements G
 		return committed.gridSize(tid);
 	}
 
-	Set<String> readSet = new HashSet<String>();
-	Set<String> writeSet = new HashSet<String>();
+	public boolean hasConflictWith(Set<String> otherReadSet, Set<String> otherWriteSet) {
+
+		//Write-type conflicts
+		for (String x:this.writeSet) {
+			for (String y:otherWriteSet)
+				if (x.equals(y))
+					return true;
+		}
+/*
+		for (String x:readSet) {
+			for (String y:secondWriteSet)
+				if (x.subSequence(arg0, arg1)y) == 0)
+				return true;
+		}
+*/
+
+		return false;
+	}
+
+	protected Set<String> readSet = new HashSet<String>();
+	protected Set<String> writeSet = new HashSet<String>();
 }
