@@ -51,6 +51,7 @@ abstract public class AbstractServer extends Node {
 				SafeStorage.save( AbstractServer.this, "grid", grid ) ;
 			}
 		} ;
+
 	}
 
 		

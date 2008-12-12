@@ -22,9 +22,13 @@ abstract public class AbstractTransactionManager extends UnicastRemoteObject imp
 		this.tidCounter = SafeStorage.load(owner, "TID", (long) owner.sid << 32);
 	}
 
+	public EndPoint retrieveServerEndpoint() {
+		throw new RuntimeException("Not implemented...");
+	}
+	
 	protected abstract AbstractTransaction createTransaction(long tid, TimeStamp timeStamp);
 
-	public long openTransaction() {
+	public long openTransaction(EndPoint src) {
 		throw new RuntimeException("Not implemented...");
 	}
 

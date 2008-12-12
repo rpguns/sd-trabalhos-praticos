@@ -12,6 +12,8 @@ abstract public class Clock {
 	
 	public abstract TimeStamp value() ;
 	
+	public abstract double realValue() ;
+	
 	public abstract Clock increment() ;
 	
 	public abstract Clock update( TimeStamp other ) ;

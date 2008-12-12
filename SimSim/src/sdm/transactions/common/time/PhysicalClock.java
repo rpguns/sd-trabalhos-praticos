@@ -9,6 +9,10 @@ public class PhysicalClock extends Clock {
 		this.owner = owner ;
 	}
 	
+	public double realValue() {
+		return ((PhysicalClockTimeStamp)value()).realValue();
+	}
+	
 	public TimeStamp value() {
 		return new PhysicalClockTimeStamp( owner.currentTime() ) ;
 	}
@@ -25,11 +29,15 @@ public class PhysicalClock extends Clock {
 		return "(<)" ;
 	}
 	
-	static class PhysicalClockTimeStamp implements TimeStamp {
+	public static class PhysicalClockTimeStamp implements TimeStamp {
 		final double value ;
 		
 		PhysicalClockTimeStamp( double v ) {
 			value = v ;
+		}
+		
+		public double realValue() {
+			return value;
 		}
 		
 		public int compareTo( TimeStamp other) {

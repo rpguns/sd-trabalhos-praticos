@@ -6,16 +6,19 @@ import java.util.*;
 import simsim.core.*;
 import simsim.ext.rmi.*;
 
+import sdm.transactions.project7.msgs.*;
 import sdm.transactions.common.*;
 import sdm.transactions.common.grid.*;
 import static simsim.core.Simulation.*;
 import static sdm.transactions.common.transaction.Transaction.*;
 
-public class Client extends Node {
+public class Client extends Node implements RemoteClient {
 
 	public Client() {
 		super(Color.green);
 	}
+
+	protected long tid = -1;
 
 	public void init() {
 
@@ -37,8 +40,8 @@ public class Client extends Node {
 
 	void doCentralizedBlank() {
 		TransactionalGridOperations tgo = Naming.lookupServer(endpoint(0), "//Server" + rg.nextInt(ServerDB.size()) + "/tgo");
-
-		long tid = tgo.openTransaction();
+		
+		long tid = tgo.openTransaction(endpoint);
 
 		int[] gs = tgo.gridSize(tid);
 
@@ -56,7 +59,7 @@ public class Client extends Node {
 	void doCentralizedCircle() {
 		TransactionalGridOperations tgo = Naming.lookupServer(endpoint(0), "//Server" + rg.nextInt(ServerDB.size()) + "/tgo");
 
-		long tid = tgo.openTransaction();
+		tid = tgo.openTransaction(endpoint);
 
 		int[] gs = tgo.gridSize(tid);
 
@@ -67,7 +70,7 @@ public class Client extends Node {
 			int x = ij >> 16, y = ij & 0xFFFF;
 			c += inColor ? tgo.readColor(tid, x, y) : tgo.readShape(tid, x, y) ;			
 		}
-				
+
 		for (int ij : circleCoords(gs[0], gs[1], radius/4 + 5)) {
 
 			int x = ij >> 16, y = ij & 0xFFFF;
@@ -77,8 +80,9 @@ public class Client extends Node {
 			else
 				tgo.writeShape(tid, x, y, c);
 		}
-		
+
 		Result res = tgo.closeTransaction(tid);
+		tid = -1;
 		System.out.println("Exit: doCentralizedCircle: " + res);
 	}
 
@@ -109,8 +113,8 @@ public class Client extends Node {
 		}
 		return res;
 	}
-	
-	
+
+
 	public String toString() {
 		return "Client " + key ;
 	}

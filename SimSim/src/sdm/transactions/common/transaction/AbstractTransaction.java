@@ -5,7 +5,7 @@ import sdm.transactions.common.time.*;
 abstract public class AbstractTransaction implements Comparable<AbstractTransaction> {
 
 	protected long tid ;
-	protected TimeStamp timeStamp ;
+	public TimeStamp timeStamp ;
 
 	protected AbstractTransaction() {}		
 
