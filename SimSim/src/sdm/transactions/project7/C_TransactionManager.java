@@ -132,7 +132,7 @@ public class C_TransactionManager extends AbstractTransactionManager implements 
 					if (t.updated(i, j))
 						k++;
 
-				//owner.grid.display(i, j, gs, k, owner.isOffline());
+				owner.grid.display(i, j, gs, k, owner.isOffline());
 				
 			}
 	}
