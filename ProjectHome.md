@@ -1,0 +1,1 @@
+Este projecto encapsula o simulador de suporte às aulas práticas da cadeira de Sistemas Distribuídos (MEI-FCT-UNL) e pacotes respeitantes à implementação realizada sobre o simulador para resolver cada um dos trabalhos práticos
